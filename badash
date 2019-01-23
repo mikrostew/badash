@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+# TODO: what things should I set here, like pipefail and lastpipe and so forth?
+
+# get the path to the script
+script_file="$1"
+shift
+
+# ensure the cache dir exists
+script_cache="$HOME/.badash"
+mkdir -p "$script_cache"
+
+# generate a new script
+generated_script="$script_cache/$(basename "$script_file")"
+echo "#!/usr/bin/env bash" > "$generated_script"
+cat "$script_file" >> "$generated_script"
+# make sure it is executable
+chmod +x "$generated_script"
+
+# execute the generated script
+"$generated_script" "$@"
+
+# TODO: catch/identify errors and print the line that they came from
+# (in the original file)
