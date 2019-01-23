@@ -3,8 +3,15 @@
 # TODO: what things should I set here, like pipefail and lastpipe and so forth?
 
 # get the path to the script
+if [ -z "$1" ]
+then
+  echo "badash: Missing argument: script to execute" >&2
+  exit 1
+fi
 script_file="$1"
 shift
+
+# TODO: help argument to describe usage
 
 # ensure the cache dir exists
 script_cache="$HOME/.badash"
