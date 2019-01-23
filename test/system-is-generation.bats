@@ -22,6 +22,7 @@ teardown() {
   # check the generated file
   expected_contents="$(cat <<'END_OF_GEN_CODE'
 #!/usr/bin/env bash
+
 if [ "$(uname -s | tr [:upper:] [:lower:])" == "donkey" ]; then echo "nope"; else echo "$(uname -s)"; fi
 END_OF_GEN_CODE
   )"

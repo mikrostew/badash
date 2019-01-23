@@ -17,6 +17,9 @@ shift
 script_cache="$HOME/.badash"
 mkdir -p "$script_cache"
 
+# setup variables
+current_line_num="0"
+
 # generate a new script
 generated_script="$script_cache/$(basename "$script_file")"
 # first line in the file, so that bash will execute the script
@@ -25,11 +28,11 @@ echo "#!/usr/bin/env bash" > "$generated_script"
 # read the script line by line
 while IFS= read -r line
 do
-  # TODO: increment line counter
+  (( current_line_num++ ))
 
-  # skip comment lines and blank lines
-  if [[ "$line" =~ ^[[:blank:]]*# ]] || [ -z "$line" ]
+  if [ "$current_line_num" == "1" ] && [ "${line:0:2}" == "#!" ]
   then
+    # remove the shebang line
     continue
 
   # generate code for system_is_darwin?, system_is_linux?, etc.

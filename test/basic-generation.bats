@@ -11,7 +11,7 @@ teardown() {
   rm -rf "$tmpdir"
 }
 
-@test "removes comments and blank lines" {
+@test "does not remove comments and blank lines" {
   bash_script="test/fixtures/basic-comments"
   generated_file="$tmpdir/.badash/basic-comments"
 
@@ -21,6 +21,10 @@ teardown() {
   # check the generated file
   expected_contents="$(cat <<'END_OF_GEN_CODE'
 #!/usr/bin/env bash
+
+# comment that will not be removed
+# and another comment line
+
 echo 'Comments and blank lines' # not removed
 END_OF_GEN_CODE
   )"
