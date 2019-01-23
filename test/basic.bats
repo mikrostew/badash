@@ -1,6 +1,14 @@
 #!/usr/bin/env bats
 
-# TODO: set HOME to isolate these tests
+# set HOME to isolate these tests
+setup() {
+  tmpdir="$(mktemp -d /tmp/badash.test.XXXXXX)"
+  HOME="$tmpdir"
+}
+
+teardown() {
+  rm -rf "$tmpdir"
+}
 
 @test "runs a vanilla bash script" {
   bash_script="test/fixtures/basic.bash"
