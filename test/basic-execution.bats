@@ -11,7 +11,7 @@ teardown() {
 }
 
 @test "runs a vanilla bash script" {
-  bash_script="test/fixtures/basic.bash"
+  bash_script="test/fixtures/basic"
   run badash "$bash_script"
   [ "$status" -eq 0 ]
   [ "${lines[0]}" == "I'm a basic script stdout" ]
@@ -19,7 +19,7 @@ teardown() {
 }
 
 @test "runs a vanilla bash script with args" {
-  bash_script="test/fixtures/basic-with-args.bash"
+  bash_script="test/fixtures/basic-with-args"
   run badash "$bash_script" -f somefile
   [ "$status" -eq 0 ]
   [ "$output" == "basic script, arg1 is -f, arg2 is somefile" ]

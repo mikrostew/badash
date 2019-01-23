@@ -12,8 +12,8 @@ teardown() {
 }
 
 @test "removes comments and blank lines" {
-  bash_script="test/fixtures/basic-comments.bash"
-  generated_file="$tmpdir/.badash/basic-comments.bash"
+  bash_script="test/fixtures/basic-comments"
+  generated_file="$tmpdir/.badash/basic-comments"
 
   run badash "$bash_script"
   [ "$status" -eq 0 ]
