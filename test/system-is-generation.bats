@@ -11,18 +11,20 @@ teardown() {
   rm -rf "$tmpdir"
 }
 
-@test "removes comments and blank lines" {
-  bash_script="test/fixtures/basic-comments.bash"
-  generated_file="$tmpdir/.badash/basic-comments.bash"
+@test "generates code for system_is_*?" {
+  # TODO: need to refactor some functions to get paths to fixture files and generated files
+  bash_script="test/fixtures/system-is-gen"
+  generated_file="$tmpdir/.badash/system-is-gen"
 
   run badash "$bash_script"
   [ "$status" -eq 0 ]
-  [ "$output" == "Comments and blank lines" ]
+  [ "$output" == "$(uname -s)" ]
   # check the generated file
   expected_contents="$(cat <<'END_OF_GEN_CODE'
 #!/usr/bin/env bash
-echo 'Comments and blank lines' # not removed
+if [ "$(uname -s | tr [:upper:] [:lower:])" == "donkey" ]; then echo "nope"; else echo "$(uname -s)"; fi
 END_OF_GEN_CODE
   )"
   [ "$(<$generated_file)" == "$expected_contents" ]
 }
+

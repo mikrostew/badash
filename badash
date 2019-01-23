@@ -25,13 +25,27 @@ echo "#!/usr/bin/env bash" > "$generated_script"
 # read the script line by line
 while IFS= read -r line
 do
+  # TODO: increment line counter
+
   # skip comment lines and blank lines
   if [[ "$line" =~ ^[[:blank:]]*# ]] || [ -z "$line" ]
   then
-    # TODO: increment line counter
     continue
+
+  # generate code for system_is_darwin?, system_is_linux?, etc.
+  # (which is case-insensitive, so system_is_Darwin? == system_is_DARWIN? == system_is_darwin?)
+  elif [[ "$line" =~ system_is_(.*)\? ]]
+  then
+    system="${BASH_REMATCH[1]}"
+    system_lowercase="$(echo "$system" | tr '[:upper:]' '[:lower:]')"
+    # for example:
+    # system_is_Darwin?  -->  [ "$(uname -s | tr [:upper:] [:lower:])" == "darwin" ]
+    replaced_test="${line/system_is_$system?/[ \"\$(uname -s | tr '[:upper:]' '[:lower:]')\" == \"$system_lowercase\" ]}"
+    echo "$replaced_test" >> "$generated_script"
+
   else
     echo "$line" >> "$generated_script"
+
   fi
 done <"$script_file"
 
