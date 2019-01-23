@@ -25,7 +25,14 @@ echo "#!/usr/bin/env bash" > "$generated_script"
 # read the script line by line
 while IFS= read -r line
 do
-  echo "$line" >> "$generated_script"
+  # skip comment lines and blank lines
+  if [[ "$line" =~ ^[[:blank:]]*# ]] || [ -z "$line" ]
+  then
+    # TODO: increment line counter
+    continue
+  else
+    echo "$line" >> "$generated_script"
+  fi
 done <"$script_file"
 
 # make sure it is executable
