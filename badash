@@ -19,8 +19,15 @@ mkdir -p "$script_cache"
 
 # generate a new script
 generated_script="$script_cache/$(basename "$script_file")"
+# first line in the file, so that bash will execute the script
 echo "#!/usr/bin/env bash" > "$generated_script"
-cat "$script_file" >> "$generated_script"
+
+# read the script line by line
+while IFS= read -r line
+do
+  echo "$line" >> "$generated_script"
+done <"$script_file"
+
 # make sure it is executable
 chmod +x "$generated_script"
 
