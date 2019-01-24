@@ -2,6 +2,63 @@
 
 # TODO: what things should I set here, like pipefail and lastpipe and so forth?
 
+
+########## FUNCTIONS ##########
+
+# generate code to exit with a message if there is an error
+gen_exit_on_error() {
+  # arguments:
+  local varname="$1" # write the generated code to this variable
+  local padding="$2" # generate the code to match the padding of the surrounding code
+  local exit_info="$3" # 1 or 2 strings: the exit message, and optional code to run before exiting
+
+  if [ -z "$exit_info" ]
+  then
+    echo "" >&2
+    echo "badash: Wrong number of arguments to @exit_on_error: expected 1 or 2, got 0" >&2
+    exit 1
+  fi
+
+  # split up the strings, one per line, preserving spaces inside the quotes
+  # (see https://superuser.com/a/1066541)
+  local exit_options="$(eval "for arg in $exit_info; do echo \$arg; done")"
+  readarray -t exit_options <<< "$exit_options"
+  local num_exit_strings="${#exit_options[@]}"
+
+  # generate any code to run before exiting
+  local run_code=""
+  if [ "$num_exit_strings" -eq 1 ]
+  then
+    run_code="# (no code to run before exit)"
+  elif [ "$num_exit_strings" -eq 2 ]
+  then
+    # run this code before exiting
+    run_code="${exit_options[1]}"
+  else
+    echo "" >&2
+    echo "badash: Wrong number of arguments to @exit_on_error: expected 1 or 2, got $num_exit_strings" >&2
+    exit 1
+  fi
+
+  # generate the code block for this
+  # TODO: colored output for the error message
+  local temp_code=""
+  read -d '' temp_code <<END_GEN_CODE
+${padding}exit_code="\$?"
+${padding}if [ "\$exit_code" -ne 0 ]
+${padding}then
+${padding}  echo "${exit_options[0]}" >&2
+${padding}  $run_code
+${padding}  exit "\$exit_code"
+${padding}fi
+END_GEN_CODE
+
+  printf -v "$varname" "$temp_code"
+}
+
+
+########## EXECUTION START ##########
+
 # get the path to the script
 if [ -z "$1" ]
 then
@@ -46,6 +103,14 @@ do
     replaced_test="${line/system_is_$system?/[ \"\$(uname -s | tr '[:upper:]' '[:lower:]')\" == \"$system_lowercase\" ]}"
     echo "$replaced_test" >> "$generated_script"
 
+  # exit with an error message if the previous command failed
+  elif [[ "$line" =~ ^(\ *)@exit_on_error\ *(.*)$ ]]
+  then
+    padding="${BASH_REMATCH[1]}"
+    exit_info_strings="${BASH_REMATCH[2]}"
+    gen_exit_on_error gen_code "$padding" "$exit_info_strings"
+    echo "$gen_code" >> "$generated_script"
+
   else
     echo "$line" >> "$generated_script"
 
@@ -59,4 +124,4 @@ chmod +x "$generated_script"
 "$generated_script" "$@"
 
 # TODO: catch/identify errors and print the line that they came from
-# (in the original file)
+# (in the original file or library or here)

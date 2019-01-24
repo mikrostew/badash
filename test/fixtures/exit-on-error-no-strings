@@ -1,0 +1,6 @@
+#!/usr/bin/env badash
+
+echo "no strings"
+@exit_on_error
+
+echo "should fail to compile"
