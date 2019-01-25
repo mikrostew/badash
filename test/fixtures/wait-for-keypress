@@ -1,0 +1,3 @@
+#!/usr/bin/env badash
+echo "should do things"
+@wait_for_keypress 'Press any key to continue...'

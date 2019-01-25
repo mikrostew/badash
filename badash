@@ -56,6 +56,26 @@ END_GEN_CODE
   printf -v "$varname" "$temp_code"
 }
 
+# generate code to wait for a keypress
+gen_wait_for_keypress() {
+  # arguments:
+  local varname="$1" # write the generated code to this variable
+  local padding="$2" # generate the code to match the padding of the surrounding code
+  local prompt_str="$3" # string to prompt the user (should be enclosed in quotes)
+
+  # TODO: check the prompt string somehow? make sure it's a string?
+
+  local temp_code=""
+  # I could use read -p to display the prompt, but that doesn't show up for automatic input
+  # (and I want to check the output in the test)
+  read -d '' temp_code <<END_GEN_CODE
+${padding}echo -n $prompt_str
+${padding}read -n1 -s
+END_GEN_CODE
+
+  printf -v "$varname" "$temp_code"
+}
+
 
 ########## EXECUTION START ##########
 
@@ -94,6 +114,7 @@ do
 
   # generate code for system_is_darwin?, system_is_linux?, etc.
   # (which is case-insensitive, so system_is_Darwin? == system_is_DARWIN? == system_is_darwin?)
+  # TODO: this should start with '@' - figure out how to do deprecation
   elif [[ "$line" =~ system_is_(.*)\? ]]
   then
     system="${BASH_REMATCH[1]}"
@@ -108,8 +129,17 @@ do
   then
     padding="${BASH_REMATCH[1]}"
     exit_info_strings="${BASH_REMATCH[2]}"
-    gen_exit_on_error gen_code "$padding" "$exit_info_strings"
-    echo "$gen_code" >> "$generated_script"
+    gen_exit_on_error gen_exit "$padding" "$exit_info_strings"
+    echo "$gen_exit" >> "$generated_script"
+
+  elif [[ "$line" =~ ^(\ *)@wait_for_keypress\ (.*)$ ]]
+  then
+    padding="${BASH_REMATCH[1]}"
+    prompt_str="${BASH_REMATCH[2]}"
+    gen_wait_for_keypress gen_keypress "$padding" "$prompt_str"
+    echo "$gen_keypress" >> "$generated_script"
+
+  # TODO: @confirm_y/n
 
   else
     echo "$line" >> "$generated_script"

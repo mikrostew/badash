@@ -53,6 +53,23 @@ then
 fi
 ```
 
+### @wait_for_keypress
+
+This is a convenience method to wait for the user to press a key to continue execution of the script.
+
+For example:
+
+```bash
+@wait_for_keypress 'Press a key to continue...'
+```
+
+compiles to:
+
+```bash
+echo -n 'Press a key to continue...'
+read -n1 -s
+```
+
 
 ### system_is_*
 
