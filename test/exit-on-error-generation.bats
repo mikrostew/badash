@@ -90,18 +90,11 @@ badash: Wrong number of arguments to @exit_on_error: expected 1 or 2, got 0
 END_OF_OUTPUT
   )"
 
-  # file is only partially created
-  expected_file_contents="$(cat <<'END_FILE_CONTENTS'
-#!/usr/bin/env bash
-
-echo "no strings"
-END_FILE_CONTENTS
-  )"
-
   run badash "$bash_script"
   [ "$status" -eq 1 ]
   diff <(echo "$output") <(echo "$expected_output")
-  diff "$generated_file" <(echo "$expected_file_contents")
+  # (executable file is not created)
+  [ ! -f "$generated_file" ]
 }
 
 
@@ -116,17 +109,10 @@ badash: Wrong number of arguments to @exit_on_error: expected 1 or 2, got 3
 END_OF_OUTPUT
   )"
 
-  # file is only partially created
-  expected_file_contents="$(cat <<'END_FILE_CONTENTS'
-#!/usr/bin/env bash
-
-echo "three strings"
-END_FILE_CONTENTS
-  )"
-
   run badash "$bash_script"
   [ "$status" -eq 1 ]
   diff <(echo "$output") <(echo "$expected_output")
-  diff "$generated_file" <(echo "$expected_file_contents")
+  # (executable file is not created)
+  [ ! -f "$generated_file" ]
 }
 

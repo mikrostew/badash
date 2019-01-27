@@ -97,10 +97,16 @@ mkdir -p "$script_cache"
 # setup variables
 current_line_num="0"
 
-# generate a new script
+# structure of the generated code
+generated_header=()  # header, including the shebang
+# generated_imports=() # imported functions and variables
+generated_body=()    # the main body of executable code
+
+# generated code will be written to this file
 generated_script="$script_cache/$(basename "$script_file")"
+
 # first line in the file, so that bash will execute the script
-echo "#!/usr/bin/env bash" > "$generated_script"
+generated_header+=( "#!/usr/bin/env bash" )
 
 # read the script line by line
 while IFS= read -r line
@@ -122,7 +128,7 @@ do
     # for example:
     # system_is_Darwin?  -->  [ "$(uname -s | tr [:upper:] [:lower:])" == "darwin" ]
     replaced_test="${line/system_is_$system?/[ \"\$(uname -s | tr '[:upper:]' '[:lower:]')\" == \"$system_lowercase\" ]}"
-    echo "$replaced_test" >> "$generated_script"
+    generated_body+=( "$replaced_test" )
 
   # exit with an error message if the previous command failed
   elif [[ "$line" =~ ^(\ *)@exit_on_error\ *(.*)$ ]]
@@ -130,22 +136,33 @@ do
     padding="${BASH_REMATCH[1]}"
     exit_info_strings="${BASH_REMATCH[2]}"
     gen_exit_on_error gen_exit "$padding" "$exit_info_strings"
-    echo "$gen_exit" >> "$generated_script"
+    generated_body+=( "$gen_exit" )
 
   elif [[ "$line" =~ ^(\ *)@wait_for_keypress\ (.*)$ ]]
   then
     padding="${BASH_REMATCH[1]}"
     prompt_str="${BASH_REMATCH[2]}"
     gen_wait_for_keypress gen_keypress "$padding" "$prompt_str"
-    echo "$gen_keypress" >> "$generated_script"
+    generated_body+=( "$gen_keypress" )
 
   # TODO: @confirm_y/n
+  # but, how to do default for that (specify default yes or no)
+  # like @confirm_Y/n vs. @confirm_y/N ?? guess that would work...
 
   else
-    echo "$line" >> "$generated_script"
+    # no imports or anything to do, just add to the body
+    generated_body+=( "$line" )
 
   fi
 done <"$script_file"
+
+# write all the lines to the script
+echo "$(
+  IFS=$'\n';
+  echo "${generated_header[*]}";
+  # echo "${generated_imports[*]}";
+  echo "${generated_body[*]}";
+)" > "$generated_script"
 
 # make sure it is executable
 chmod +x "$generated_script"
