@@ -2,6 +2,8 @@
 
 # TODO: what things should I set here, like pipefail and lastpipe and so forth?
 
+REQ_CHECK_FUNC_NAME="gen::req_check"
+
 
 ########## FUNCTIONS ##########
 
@@ -76,6 +78,66 @@ END_GEN_CODE
   printf -v "$varname" "$temp_code"
 }
 
+# add a command to the list of requirements
+add_cmd_requirements() {
+  local cmd_names_string="$1"
+
+  # split these on comma and/or space
+  IFS=', ' read -r -a cmd_names_array <<< "$cmd_names_string"
+  for cmd_name in "${cmd_names_array[@]}"
+  do
+    # TODO: provide better help info on how to install specific things?
+    # how_to_install="search 'how to install $cmd_name'"
+
+    # TODO: split this up into mac/linux/etc. here?
+    # TODO: allow version specifiers?
+    # add command to requirements for the script
+    cmd_requirements[$cmd_name]="*"
+  done
+
+  # make sure the function that checks requirements is part of imports
+  # TODO: input the name of the current script that is being executed (instead of badash)
+  import_function_lazy "$REQ_CHECK_FUNC_NAME" 'gen_requirement_check' 'badash'
+}
+
+# generate function to check for required commands in the script
+gen_requirement_check() {
+  local script_name="$1"
+
+  # arguments to this function:
+  # $1: if cmd is not found, write non-zero value to this variable
+  # $2: command to check for
+  cat <<END_OF_REQ_CHECK
+$REQ_CHECK_FUNC_NAME() {
+  if [ ! \$(command -v \$2) ]; then
+    echo "$script_name: Required command '\$2' not found"
+    printf -v "\$1" "1"
+  fi
+}
+END_OF_REQ_CHECK
+}
+
+# import a function if it has not already been imported
+import_function_lazy() {
+  # arguments:
+  local func_name="$1"
+  local gen_func_name="$2" # command to run to import the function
+  shift 2 # now "$@" captures any arguments to pass to that function
+
+  # TODO: import from files
+
+  # if we've already done the import, don't re-import
+  if [ -n "${function_imports[$func_name]}" ]
+  then
+    return 0
+  fi
+
+  # TODO: refactor this not to use a subshell (gen_func_name will have to use print -v)
+  function_text="$("$gen_func_name" "$@")"
+  function_imports[$func_name]="$function_text"
+}
+
+
 
 ########## EXECUTION START ##########
 
@@ -99,8 +161,11 @@ current_line_num="0"
 
 # structure of the generated code
 generated_header=()  # header, including the shebang
-# generated_imports=() # imported functions and variables
 generated_body=()    # the main body of executable code
+
+# keep track of imports and requirements
+declare -A cmd_requirements
+declare -A function_imports
 
 # generated code will be written to this file
 generated_script="$script_cache/$(basename "$script_file")"
@@ -120,7 +185,7 @@ do
 
   # generate code for system_is_darwin?, system_is_linux?, etc.
   # (which is case-insensitive, so system_is_Darwin? == system_is_DARWIN? == system_is_darwin?)
-  # TODO: this should start with '@' - figure out how to do deprecation
+  # TODO: this should start with '@' - figure out how to do deprecation?
   elif [[ "$line" =~ system_is_(.*)\? ]]
   then
     system="${BASH_REMATCH[1]}"
@@ -145,6 +210,11 @@ do
     gen_wait_for_keypress gen_keypress "$padding" "$prompt_str"
     generated_body+=( "$gen_keypress" )
 
+  elif [[ "$line" =~ ^@uses_cmds\ (.*)$ ]]
+  then
+    cmd_names="${BASH_REMATCH[1]}"
+    add_cmd_requirements "$cmd_names"
+
   # TODO: @confirm_y/n
   # but, how to do default for that (specify default yes or no)
   # like @confirm_Y/n vs. @confirm_y/N ?? guess that would work...
@@ -156,11 +226,36 @@ do
   fi
 done <"$script_file"
 
+
+# collect the imports
+generated_imports=()
+for function_name in "${!function_imports[@]}"
+do
+  generated_imports+=( "${function_imports[$function_name]}" )
+done
+
+# generate the requirement check code
+generated_reqs=()
+if [ "${#cmd_requirements[@]}" -gt 0 ]
+then
+  # add the checks for command requirements
+  generated_reqs+=( '_gen_cmd_check_rtn=0' )
+  for cmd_name in "${!cmd_requirements[@]}"
+  do
+    # TODO: platform-specific commands - probably: if [[ "$cmd_name" =~ (.*)/(.*) ]]...
+    generated_reqs+=( "$REQ_CHECK_FUNC_NAME _gen_cmd_check_rtn $cmd_name" )
+  done
+  generated_reqs+=( 'if [ "$_gen_cmd_check_rtn" != 0 ]; then exit $_gen_cmd_check_rtn; fi' )
+fi
+
+
+
 # write all the lines to the script
 echo "$(
   IFS=$'\n';
   echo "${generated_header[*]}";
-  # echo "${generated_imports[*]}";
+  [ "${#generated_imports[@]}" -gt 0 ] && echo "${generated_imports[*]}";
+  [ "${#generated_reqs[@]}" -gt 0 ] && echo "${generated_reqs[*]}";
   echo "${generated_body[*]}";
 )" > "$generated_script"
 
