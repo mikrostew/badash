@@ -10,6 +10,8 @@ teardown() {
   rm -rf "$tmpdir"
 }
 
+# TODO: test line containing comment (probably fails ATM)
+
 
 # generate code for "@exit_on_error 'some msg'"
 @test "@exit_on_error - message only" {

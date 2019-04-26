@@ -25,7 +25,7 @@ END_OF_OUTPUT
   expected_file_contents="$(cat <<'END_FILE_CONTENTS'
 #!/usr/bin/env bash
 echo "should do things"
-echo -n 'Press any key to continue...'
+echo 'Press any key to continue...'
 read -n1 -s
 END_FILE_CONTENTS
   )"

@@ -1,0 +1,3 @@
+#!/usr/bin/env badash
+@uses_cmds sed
+echo "should execute"

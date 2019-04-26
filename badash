@@ -71,7 +71,7 @@ gen_wait_for_keypress() {
   # I could use read -p to display the prompt, but that doesn't show up for automatic input
   # (and I want to check the output in the test)
   read -d '' temp_code <<END_GEN_CODE
-${padding}echo -n $prompt_str
+${padding}echo $prompt_str
 ${padding}read -n1 -s
 END_GEN_CODE
 
@@ -110,7 +110,7 @@ gen_requirement_check() {
   cat <<END_OF_REQ_CHECK
 $REQ_CHECK_FUNC_NAME() {
   if [ ! \$(command -v \$2) ]; then
-    echo "$script_name: Required command '\$2' not found"
+    echo "$script_name: Required command '\$2' not found" >&2
     printf -v "\$1" "1"
   fi
 }
@@ -185,7 +185,7 @@ do
 
   # generate code for system_is_darwin?, system_is_linux?, etc.
   # (which is case-insensitive, so system_is_Darwin? == system_is_DARWIN? == system_is_darwin?)
-  # TODO: this should start with '@' - figure out how to do deprecation?
+  # TODO: this should start with '@' - figure out deprecation for this
   elif [[ "$line" =~ system_is_(.*)\? ]]
   then
     system="${BASH_REMATCH[1]}"

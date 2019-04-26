@@ -1,0 +1,3 @@
+#!/usr/bin/env badash
+@uses_cmds some-command-that-does-not-exist
+echo "should not print this"
