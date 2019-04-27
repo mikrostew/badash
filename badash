@@ -86,12 +86,8 @@ add_cmd_requirements() {
   IFS=', ' read -r -a cmd_names_array <<< "$cmd_names_string"
   for cmd_name in "${cmd_names_array[@]}"
   do
-    # TODO: provide better help info on how to install specific things?
-    # how_to_install="search 'how to install $cmd_name'"
-
-    # TODO: split this up into mac/linux/etc. here?
-    # TODO: allow version specifiers?
     # add command to requirements for the script
+    # TODO: allow version specifiers, for now just use any version
     cmd_requirements[$cmd_name]="*"
   done
 
@@ -102,12 +98,13 @@ add_cmd_requirements() {
 
 # generate function to check for required commands in the script
 gen_requirement_check() {
-  local script_name="$1"
+  local retvar="$1" # write the function text to this variable
+  local script_name="$2"
 
   # arguments to this function:
   # $1: if cmd is not found, write non-zero value to this variable
   # $2: command to check for
-  cat <<END_OF_REQ_CHECK
+  read -d '' func_text <<END_OF_REQ_CHECK
 $REQ_CHECK_FUNC_NAME() {
   if [ ! \$(command -v \$2) ]; then
     echo "$script_name: Required command '\$2' not found" >&2
@@ -115,6 +112,8 @@ $REQ_CHECK_FUNC_NAME() {
   fi
 }
 END_OF_REQ_CHECK
+  # write the function text to the variable (instead of echo)
+  printf -v $retvar "$func_text"
 }
 
 # import a function if it has not already been imported
@@ -132,8 +131,8 @@ import_function_lazy() {
     return 0
   fi
 
-  # TODO: refactor this not to use a subshell (gen_func_name will have to use print -v)
-  function_text="$("$gen_func_name" "$@")"
+  # use that function to write the function text to 'function_text' var
+  "$gen_func_name" function_text "$@"
   function_imports[$func_name]="$function_text"
 }
 
