@@ -1,0 +1,3 @@
+#!/usr/bin/env badash
+@uses_cmds Darwin/sed Linux/grep jq
+echo "should execute"
