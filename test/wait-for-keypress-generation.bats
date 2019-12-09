@@ -31,7 +31,7 @@ END_FILE_CONTENTS
   )"
 
   # need to simulate input in stdin so this test doesn't hang
-  run badash "$bash_script" < <(echo 'y')
+  run ./badash "$bash_script" < <(echo 'y')
   [ "$status" -eq 0 ]
   diff <(echo "$output") <(echo "$expected_output")
   diff "$generated_file" <(echo "$expected_file_contents")

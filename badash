@@ -81,6 +81,7 @@ END_GEN_CODE
 # add a command to the list of requirements
 add_cmd_requirements() {
   local cmd_names_string="$1"
+  local calling_script="$2"
 
   # split these on comma and/or space
   IFS=', ' read -r -a cmd_names_array <<< "$cmd_names_string"
@@ -92,8 +93,7 @@ add_cmd_requirements() {
   done
 
   # make sure the function that checks requirements is part of imports
-  # TODO: input the name of the current script that is being executed (instead of badash)
-  import_function_lazy "$REQ_CHECK_FUNC_NAME" 'gen_requirement_check' 'badash'
+  import_function_lazy "$REQ_CHECK_FUNC_NAME" 'gen_requirement_check' "$calling_script"
 }
 
 # generate function to check for required commands in the script
@@ -167,7 +167,8 @@ declare -A cmd_requirements
 declare -A function_imports
 
 # generated code will be written to this file
-generated_script="$script_cache/$(basename "$script_file")"
+bare_script_name="$(basename "$script_file")"
+generated_script="$script_cache/$bare_script_name"
 
 # first line in the file, so that bash will execute the script
 generated_header+=( "#!/usr/bin/env bash" )
@@ -212,7 +213,7 @@ do
   elif [[ "$line" =~ ^@uses_cmds\ (.*)$ ]]
   then
     cmd_names="${BASH_REMATCH[1]}"
-    add_cmd_requirements "$cmd_names"
+    add_cmd_requirements "$cmd_names" "$bare_script_name"
 
   # TODO: @confirm_y/n
   # but, how to do default for that (specify default yes or no)

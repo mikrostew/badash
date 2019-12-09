@@ -26,7 +26,7 @@ END_OF_OUTPUT
 #!/usr/bin/env bash
 gen::req_check() {
   if [ ! $(command -v $2) ]; then
-    echo "badash: Required command '$2' not found" >&2
+    echo "uses-cmds-one-cmd: Required command '$2' not found" >&2
     printf -v "$1" "1"
   fi
 }
@@ -37,7 +37,7 @@ echo "should execute"
 END_FILE_CONTENTS
   )"
 
-  run badash "$bash_script"
+  run ./badash "$bash_script"
   [ "$status" -eq 0 ]
   diff <(echo "$output") <(echo "$expected_output")
   diff "$generated_file" <(echo "$expected_file_contents")
@@ -59,7 +59,7 @@ END_OF_OUTPUT
 #!/usr/bin/env bash
 gen::req_check() {
   if [ ! $(command -v $2) ]; then
-    echo "badash: Required command '$2' not found" >&2
+    echo "uses-cmds-two-cmds: Required command '$2' not found" >&2
     printf -v "$1" "1"
   fi
 }
@@ -71,7 +71,7 @@ echo "should execute"
 END_FILE_CONTENTS
   )"
 
-  run badash "$bash_script"
+  run ./badash "$bash_script"
   [ "$status" -eq 0 ]
   diff <(echo "$output") <(echo "$expected_output")
   diff "$generated_file" <(echo "$expected_file_contents")
@@ -92,7 +92,7 @@ END_OF_OUTPUT
 #!/usr/bin/env bash
 gen::req_check() {
   if [ ! $(command -v $2) ]; then
-    echo "badash: Required command '$2' not found" >&2
+    echo "uses-cmds-with-os: Required command '$2' not found" >&2
     printf -v "$1" "1"
   fi
 }
@@ -105,7 +105,7 @@ echo "should execute"
 END_FILE_CONTENTS
   )"
 
-  run badash "$bash_script"
+  run ./badash "$bash_script"
   [ "$status" -eq 0 ]
   diff <(echo "$output") <(echo "$expected_output")
   diff "$generated_file" <(echo "$expected_file_contents")
@@ -119,7 +119,7 @@ END_FILE_CONTENTS
   generated_file="$tmpdir/.badash/uses-cmds-no-exist"
 
   expected_output="$(cat <<'END_OF_OUTPUT'
-badash: Required command 'some-command-that-does-not-exist' not found
+uses-cmds-no-exist: Required command 'some-command-that-does-not-exist' not found
 END_OF_OUTPUT
   )"
 
@@ -127,7 +127,7 @@ END_OF_OUTPUT
 #!/usr/bin/env bash
 gen::req_check() {
   if [ ! $(command -v $2) ]; then
-    echo "badash: Required command '$2' not found" >&2
+    echo "uses-cmds-no-exist: Required command '$2' not found" >&2
     printf -v "$1" "1"
   fi
 }
@@ -138,7 +138,7 @@ echo "should not print this"
 END_FILE_CONTENTS
   )"
 
-  run badash "$bash_script"
+  run ./badash "$bash_script"
   [ "$status" -eq 1 ]
   diff <(echo "$output") <(echo "$expected_output")
   diff "$generated_file" <(echo "$expected_file_contents")

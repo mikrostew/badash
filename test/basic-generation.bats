@@ -15,7 +15,7 @@ teardown() {
   bash_script="test/fixtures/basic-comments"
   generated_file="$tmpdir/.badash/basic-comments"
 
-  run badash "$bash_script"
+  run ./badash "$bash_script"
   [ "$status" -eq 0 ]
   [ "$output" == "Comments and blank lines" ]
   # check the generated file

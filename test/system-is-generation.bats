@@ -16,7 +16,7 @@ teardown() {
   bash_script="test/fixtures/system-is-gen"
   generated_file="$tmpdir/.badash/system-is-gen"
 
-  run badash "$bash_script"
+  run ./badash "$bash_script"
   [ "$status" -eq 0 ]
   [ "$output" == "$(uname -s)" ]
   # check the generated file

@@ -40,7 +40,7 @@ echo "if it got this far it didn't fail"
 END_FILE_CONTENTS
   )"
 
-  run badash "$bash_script"
+  run ./badash "$bash_script"
   [ "$status" -eq 0 ]
   diff <(echo "$output") <(echo "$expected_output")
   diff "$generated_file" <(echo "$expected_file_contents")
@@ -74,7 +74,7 @@ echo "some other stuff here"
 END_FILE_CONTENTS
   )"
 
-  run badash "$bash_script"
+  run ./badash "$bash_script"
   [ "$status" -eq 0 ]
   diff <(echo "$output") <(echo "$expected_output")
   diff "$generated_file" <(echo "$expected_file_contents")
@@ -92,7 +92,7 @@ badash: Wrong number of arguments to @exit_on_error: expected 1 or 2, got 0
 END_OF_OUTPUT
   )"
 
-  run badash "$bash_script"
+  run ./badash "$bash_script"
   [ "$status" -eq 1 ]
   diff <(echo "$output") <(echo "$expected_output")
   # (executable file is not created)
@@ -111,7 +111,7 @@ badash: Wrong number of arguments to @exit_on_error: expected 1 or 2, got 3
 END_OF_OUTPUT
   )"
 
-  run badash "$bash_script"
+  run ./badash "$bash_script"
   [ "$status" -eq 1 ]
   diff <(echo "$output") <(echo "$expected_output")
   # (executable file is not created)
