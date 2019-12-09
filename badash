@@ -43,7 +43,7 @@ gen_exit_on_error() {
   fi
 
   # generate the code block for this
-  # TODO: colored output for the error message
+  # TODO: colored output for the error message?
   local temp_code=""
   read -d '' temp_code <<END_GEN_CODE
 ${padding}exit_code="\$?"
@@ -88,7 +88,7 @@ add_cmd_requirements() {
   for cmd_name in "${cmd_names_array[@]}"
   do
     # add command to requirements for the script
-    # TODO: allow version specifiers, for now just use any version
+    # TODO: allow version specifiers - for now just use any version
     cmd_requirements[$cmd_name]="*"
   done
 
@@ -183,16 +183,15 @@ do
     # remove the shebang line
     continue
 
-  # generate code for system_is_darwin?, system_is_linux?, etc.
-  # (which is case-insensitive, so system_is_Darwin? == system_is_DARWIN? == system_is_darwin?)
-  # TODO: this should start with '@' - figure out deprecation for this
-  elif [[ "$line" =~ system_is_(.*)\? ]]
+  # generate code for @system_is_darwin?, @system_is_linux?, etc.
+  # (which is case-insensitive, so @system_is_Darwin? == @system_is_DARWIN? == @system_is_darwin?)
+  elif [[ "$line" =~ @system_is_(.*)\? ]]
   then
     system="${BASH_REMATCH[1]}"
     system_lowercase="$(echo "$system" | tr '[:upper:]' '[:lower:]')"
     # for example:
-    # system_is_Darwin?  -->  [ "$(uname -s | tr [:upper:] [:lower:])" == "darwin" ]
-    replaced_test="${line/system_is_$system?/[ \"\$(uname -s | tr '[:upper:]' '[:lower:]')\" == \"$system_lowercase\" ]}"
+    # @system_is_Darwin?  -->  [ "$(uname -s | tr [:upper:] [:lower:])" == "darwin" ]
+    replaced_test="${line/@system_is_$system?/[ \"\$(uname -s | tr '[:upper:]' '[:lower:]')\" == \"$system_lowercase\" ]}"
     generated_body+=( "$replaced_test" )
 
   # exit with an error message if the previous command failed

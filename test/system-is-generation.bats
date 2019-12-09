@@ -18,7 +18,9 @@ teardown() {
 
   run ./badash "$bash_script"
   [ "$status" -eq 0 ]
-  [ "$output" == "$(uname -s)" ]
+
+  diff <(echo "$output") <(echo "$(uname -s)")
+
   # check the generated file
   expected_contents="$(cat <<'END_OF_GEN_CODE'
 #!/usr/bin/env bash
@@ -26,6 +28,7 @@ teardown() {
 if [ "$(uname -s | tr [:upper:] [:lower:])" == "donkey" ]; then echo "nope"; else echo "$(uname -s)"; fi
 END_OF_GEN_CODE
   )"
-  [ "$(<$generated_file)" == "$expected_contents" ]
+
+  diff "$generated_file" <(echo "$expected_contents")
 }
 
