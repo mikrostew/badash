@@ -11,6 +11,7 @@ This is a convenience method to check the exit code of the command that just com
 For example:
 
 ```bash
+#!/usr/bin/env badash
 git checkout master
 git merge "$some_branch"
 @exit_on_error "Failed to merge '$some_branch' to master!"
@@ -19,6 +20,7 @@ git merge "$some_branch"
 compiles to:
 
 ```bash
+#!/usr/bin/env bash
 git checkout master
 git merge "$some_branch"
 exit_code="$?"
@@ -34,6 +36,7 @@ You can also specify a line of code to run before exiting, if you need to clean 
 For example:
 
 ```bash
+#!/usr/bin/env badash
 git checkout master
 git merge "$some_branch"
 @exit_on_error "Failed to merge '$some_branch' to master!" 'git undo-merge-somehow'
@@ -42,6 +45,7 @@ git merge "$some_branch"
 compiles to:
 
 ```bash
+#!/usr/bin/env bash
 git checkout master
 git merge "$some_branch"
 exit_code="$?"
@@ -60,12 +64,14 @@ This is a convenience method to wait for the user to press a key to continue exe
 For example:
 
 ```bash
+#!/usr/bin/env badash
 @wait_for_keypress 'Press a key to continue...'
 ```
 
 compiles to:
 
 ```bash
+#!/usr/bin/env bash
 echo -n 'Press a key to continue...'
 read -n1 -s
 ```
