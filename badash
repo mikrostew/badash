@@ -218,6 +218,16 @@ do
   # but, how to do default for that (specify default yes or no)
   # like @confirm_Y/n vs. @confirm_y/N ?? guess that would work...
 
+  # TODO: @import_var
+
+  # TODO: @import functions from other files
+
+  # TODO: @arg and @arg_optional
+
+  # TODO: some way to create help text for -h/--help
+
+  # TODO: things like @@SCRIPT_NAME@@, @@DIR_NAME@@, etc, so the script can use those
+
   else
     # no imports or anything to do, just add to the body
     generated_body+=( "$line" )
