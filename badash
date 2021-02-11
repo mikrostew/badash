@@ -56,7 +56,7 @@ ${padding}  exit "\$exit_code"
 ${padding}fi
 END_GEN_CODE
 
-  printf -v "$varname" "$temp_code"
+  printf -v "$varname" "%s" "$temp_code"
 }
 
 # generate code to wait for a keypress
@@ -76,7 +76,7 @@ ${padding}echo $prompt_str
 ${padding}read -n1 -s
 END_GEN_CODE
 
-  printf -v "$varname" "$temp_code"
+  printf -v "$varname" "%s" "$temp_code"
 }
 
 # add a command to the list of requirements
@@ -114,7 +114,7 @@ $REQ_CHECK_FUNC_NAME() {
 }
 END_OF_REQ_CHECK
   # write the function text to the variable (instead of echo)
-  printf -v $retvar "$func_text"
+  printf -v $retvar "%s" "$func_text"
 }
 
 # import a function if it has not already been imported
@@ -145,7 +145,7 @@ gen-wait-for-command() {
   local command_str="$3" # the command line to run
 
   # just a simple replacement here
-  printf -v "$varname" "${padding}${WAIT_COMMAND_FUNC_NAME} $command_str"
+  printf -v "$varname" "%s" "${padding}${WAIT_COMMAND_FUNC_NAME} $command_str"
 
   # make sure the function that does that is part of imports
   import_function_lazy "$WAIT_COMMAND_FUNC_NAME" 'gen-wait-command-function'
@@ -158,15 +158,13 @@ gen-wait-command-function() {
   # TODO: I need a global list of variables to set at the beginning
 
   # (no arguments to this function)
-  # Notes:
-  #  * for some reason it takes 8 backslashes here to generate 1 in the output(!!!)
-  #  * double %, so those don't register as formatting for printf
+  # Note: it takes 4 backslashes here to generate 1 in the output(!?)
   # TODO: initial arg for whether or not to cleanup the output?
   read -d '' func_text <<END_OF_WAIT_FUNCTION
-COLOR_FG_BOLD_GREEN='\\\\\\\\033[1;32m'
-COLOR_FG_GREEN='\\\\\\\\033[0;32m'
-COLOR_FG_RED='\\\\\\\\033[0;31m'
-COLOR_RESET='\\\\\\\\033[0m'
+COLOR_FG_BOLD_GREEN='\\\\033[1;32m'
+COLOR_FG_GREEN='\\\\033[0;32m'
+COLOR_FG_RED='\\\\033[0;31m'
+COLOR_RESET='\\\\033[0m'
 # show a busy spinner while command is running
 # and only show output if there is an error
 $WAIT_COMMAND_FUNC_NAME() {
@@ -179,7 +177,7 @@ $WAIT_COMMAND_FUNC_NAME() {
   local total_length=\$(( 2 + \${#cmd_string} ))
 
   # run the command async, and capture the PID
-  local cmd_start_time=\$(gdate +%%s%%3N)
+  local cmd_start_time=\$(gdate +%s%3N)
   exec 3< <("\$@" 2>&1)
   local cmd_pid="\$!"
 
@@ -187,12 +185,12 @@ $WAIT_COMMAND_FUNC_NAME() {
   i=0
   while kill -0 \$cmd_pid 2>/dev/null
   do
-    i=\$(( (i + 1) %% num_chars ))
-    printf "\\\\\\\\r\${spin_chars:\$i:1} \${COLOR_FG_BOLD_GREEN}running\${COLOR_RESET} '\${cmd_string}'" >&2
+    i=\$(( (i + 1) % num_chars ))
+    printf "\\\\r\${spin_chars:\$i:1} \${COLOR_FG_BOLD_GREEN}running\${COLOR_RESET} '\${cmd_string}'" >&2
     sleep 0.1
   done
   # calculate total runtime (approx)
-  local cmd_stop_time=\$(gdate +%%s%%3N)
+  local cmd_stop_time=\$(gdate +%s%3N)
   local cmd_run_time=\$((cmd_stop_time - cmd_start_time))
 
   # get the exit code of that process
@@ -201,23 +199,23 @@ $WAIT_COMMAND_FUNC_NAME() {
 
   # TODO: attempt to clean up, depending on option (doesn't always work)
   # but still check if it failed?
-  #printf "\\\\\\\\r%%-\${total_length}s\\\\\\\\r" ' ' >&2
+  #printf "\\\\r%-\${total_length}s\\\\r" ' ' >&2
 
-  printf "\\\\\\\\r  \${COLOR_FG_BOLD_GREEN}running\${COLOR_RESET} '\$cmd_string' (\${cmd_run_time}ms)" >&2
+  printf "\\\\r  \${COLOR_FG_BOLD_GREEN}running\${COLOR_RESET} '\$cmd_string' (\${cmd_run_time}ms)" >&2
 
   # check that the command was successful
   if [ "\$exit_code" == 0 ]
   then
-    printf " [\${COLOR_FG_GREEN}OK\${COLOR_RESET}]\\\\\\\\n"
+    printf " [\${COLOR_FG_GREEN}OK\${COLOR_RESET}]\\\\n"
   else
-    printf " [\${COLOR_FG_RED}ERROR\${COLOR_RESET}]\\\\\\\\n"
+    printf " [\${COLOR_FG_RED}ERROR\${COLOR_RESET}]\\\\n"
     # if it fails, show the command output
     cat <&3
   fi
 }
 END_OF_WAIT_FUNCTION
   # write the function text to the variable (instead of echo)
-  printf -v $retvar "$func_text"
+  printf -v $retvar "%s" "$func_text"
 }
 
 
