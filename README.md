@@ -2,6 +2,10 @@
 
 Modular imports and other fun stuff for bash
 
+Syntax
+* [@exit_on_error](#exit_on_error)
+* [@wait_for_keypress](#wait_for_keypress)
+
 ## Syntax
 
 ### @exit_on_error
