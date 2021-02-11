@@ -1,2 +1,4 @@
 #!/usr/bin/env badash
 echo "testing wait-for-command"
+# this should always fail
+@wait-for-command mkdir -W -R -O -N -G "ok"
