@@ -1,6 +1,6 @@
 # badash
 
-Modular imports and other fun stuff for bash
+Convenience methods, modular imports, and other fun stuff for bash
 
 Syntax
 * [@exit_on_error](#exit_on_error)
