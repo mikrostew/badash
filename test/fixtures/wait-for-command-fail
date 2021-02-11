@@ -1,0 +1,2 @@
+#!/usr/bin/env badash
+echo "testing wait-for-command"
