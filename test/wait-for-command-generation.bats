@@ -24,6 +24,7 @@ testing wait-for-command
 END_OF_OUTPUT
   )"
 
+  # TODO: move these things to fixtures; they make the tests very hard to read
   expected_file_contents="$(cat <<'END_FILE_CONTENTS'
 #!/usr/bin/env bash
 COLOR_FG_BOLD_GREEN='\033[1;32m'
@@ -198,13 +199,14 @@ END_FILE_CONTENTS
   generated_file="$tmpdir/.badash/wait-for-command-fail"
 
   # the output has some timing info that varies - will fix that in the output
+  # also, the output is different on Linux
   expected_output="$(cat <<'END_OF_OUTPUT'
 testing wait-for-command
 
-   running  'mkdir -W -R -O -N -G ok'
-   running  'mkdir -W -R -O -N -G ok' (113ms) [ ERROR ]
-mkdir: illegal option -- W
-usage: mkdir [-pv] [-m mode] directory ...
+   running  './test/fixtures/fail-with-output.sh'
+   running  './test/fixtures/fail-with-output.sh' (113ms) [ ERROR ]
+stdout text
+stderr text
 END_OF_OUTPUT
   )"
 
@@ -265,7 +267,7 @@ gen::wait-for-command() {
 }
 echo "testing wait-for-command"
 # this should always fail
-gen::wait-for-command mkdir -W -R -O -N -G "ok"
+gen::wait-for-command ./test/fixtures/fail-with-output.sh
 END_FILE_CONTENTS
   )"
 
