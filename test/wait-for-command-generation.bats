@@ -30,6 +30,7 @@ COLOR_FG_BOLD_GREEN='\033[1;32m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+if [ "$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
 # show a busy spinner while command is running
 # and only show output if there is an error
 gen::wait-for-command() {
@@ -42,7 +43,7 @@ gen::wait-for-command() {
   local total_length=$(( 2 + ${#cmd_string} ))
 
   # run the command async, and capture the PID
-  local cmd_start_time=$(gdate +%s%3N)
+  local cmd_start_time=$($DATE_CMD +%s%3N)
   exec 3< <("$@" 2>&1)
   local cmd_pid="$!"
 
@@ -55,7 +56,7 @@ gen::wait-for-command() {
     sleep 0.1
   done
   # calculate total runtime (approx)
-  local cmd_stop_time=$(gdate +%s%3N)
+  local cmd_stop_time=$($DATE_CMD +%s%3N)
   local cmd_run_time=$((cmd_stop_time - cmd_start_time))
 
   # get the exit code of that process
@@ -121,6 +122,7 @@ COLOR_FG_BOLD_GREEN='\033[1;32m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+if [ "$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
 # show a busy spinner while command is running
 # and only show output if there is an error
 gen::wait-for-command() {
@@ -133,7 +135,7 @@ gen::wait-for-command() {
   local total_length=$(( 2 + ${#cmd_string} ))
 
   # run the command async, and capture the PID
-  local cmd_start_time=$(gdate +%s%3N)
+  local cmd_start_time=$($DATE_CMD +%s%3N)
   exec 3< <("$@" 2>&1)
   local cmd_pid="$!"
 
@@ -146,7 +148,7 @@ gen::wait-for-command() {
     sleep 0.1
   done
   # calculate total runtime (approx)
-  local cmd_stop_time=$(gdate +%s%3N)
+  local cmd_stop_time=$($DATE_CMD +%s%3N)
   local cmd_run_time=$((cmd_stop_time - cmd_start_time))
 
   # get the exit code of that process
@@ -212,6 +214,7 @@ COLOR_FG_BOLD_GREEN='\033[1;32m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+if [ "$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
 # show a busy spinner while command is running
 # and only show output if there is an error
 gen::wait-for-command() {
@@ -224,7 +227,7 @@ gen::wait-for-command() {
   local total_length=$(( 2 + ${#cmd_string} ))
 
   # run the command async, and capture the PID
-  local cmd_start_time=$(gdate +%s%3N)
+  local cmd_start_time=$($DATE_CMD +%s%3N)
   exec 3< <("$@" 2>&1)
   local cmd_pid="$!"
 
@@ -237,7 +240,7 @@ gen::wait-for-command() {
     sleep 0.1
   done
   # calculate total runtime (approx)
-  local cmd_stop_time=$(gdate +%s%3N)
+  local cmd_stop_time=$($DATE_CMD +%s%3N)
   local cmd_run_time=$((cmd_stop_time - cmd_start_time))
 
   # get the exit code of that process
