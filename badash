@@ -3,6 +3,7 @@
 # TODO: what things should I set here, like pipefail and lastpipe and so forth?
 
 REQ_CHECK_FUNC_NAME="gen::req_check"
+WAIT_COMMAND_FUNC_NAME="gen::wait-for-command"
 
 
 ########## FUNCTIONS ##########
@@ -136,6 +137,89 @@ import_function_lazy() {
   function_imports[$func_name]="$function_text"
 }
 
+# generate code to display a spinner while waiting for a command to finish
+gen-wait-for-command() {
+  # arguments:
+  local varname="$1" # write the generated code to this variable
+  local padding="$2" # generate the code to match the padding of the surrounding code
+  local command_str="$3" # the command line to run
+
+  # just a simple replacement here
+  printf -v "$varname" "${padding}${WAIT_COMMAND_FUNC_NAME} $command_str"
+
+  # make sure the function that does that is part of imports
+  import_function_lazy "$WAIT_COMMAND_FUNC_NAME" 'gen-wait-command-function'
+}
+
+# generate $WAIT_COMMAND_FUNC_NAME function
+gen-wait-command-function() {
+  local retvar="$1" # write the function text to this variable
+
+  # TODO: I need a global list of variables to set at the beginning
+
+  # (no arguments to this function)
+  # Notes:
+  #  * for some reason it takes 8 backslashes here to generate 1 in the output(!!!)
+  #  * double %, so those don't register as formatting for printf
+  # TODO: initial arg for whether or not to cleanup the output?
+  read -d '' func_text <<END_OF_WAIT_FUNCTION
+COLOR_FG_BOLD_GREEN='\\\\\\\\033[1;32m'
+COLOR_FG_GREEN='\\\\\\\\033[0;32m'
+COLOR_FG_RED='\\\\\\\\033[0;31m'
+COLOR_RESET='\\\\\\\\033[0m'
+# show a busy spinner while command is running
+# and only show output if there is an error
+$WAIT_COMMAND_FUNC_NAME() {
+  # input is a command array
+  local cmd_string="\$@"
+
+  # calculate things for the output
+  local spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
+  local num_chars=\${#spin_chars}
+  local total_length=\$(( 2 + \${#cmd_string} ))
+
+  # run the command async, and capture the PID
+  local cmd_start_time=\$(gdate +%%s%%3N)
+  exec 3< <("\$@" 2>&1)
+  local cmd_pid="\$!"
+
+  # wait for the command to complete, showing a busy spinner
+  i=0
+  while kill -0 \$cmd_pid 2>/dev/null
+  do
+    i=\$(( (i + 1) %% num_chars ))
+    printf "\\\\\\\\r\${spin_chars:\$i:1} \${COLOR_FG_BOLD_GREEN}running\${COLOR_RESET} '\${cmd_string}'" >&2
+    sleep 0.1
+  done
+  # calculate total runtime (approx)
+  local cmd_stop_time=\$(gdate +%%s%%3N)
+  local cmd_run_time=\$((cmd_stop_time - cmd_start_time))
+
+  # get the exit code of that process
+  wait \$cmd_pid
+  local exit_code="\$?"
+
+  # TODO: attempt to clean up, depending on option (doesn't always work)
+  # but still check if it failed?
+  #printf "\\\\\\\\r%%-\${total_length}s\\\\\\\\r" ' ' >&2
+
+  printf "\\\\\\\\r  \${COLOR_FG_BOLD_GREEN}running\${COLOR_RESET} '\$cmd_string' (\${cmd_run_time}ms)" >&2
+
+  # check that the command was successful
+  if [ "\$exit_code" == 0 ]
+  then
+    printf " [\${COLOR_FG_GREEN}OK\${COLOR_RESET}]\\\\\\\\n"
+  else
+    printf " [\${COLOR_FG_RED}ERROR\${COLOR_RESET}]\\\\\\\\n"
+    # if it fails, show the command output
+    cat <&3
+  fi
+}
+END_OF_WAIT_FUNCTION
+  # write the function text to the variable (instead of echo)
+  printf -v $retvar "$func_text"
+}
+
 
 
 ########## EXECUTION START ##########
@@ -149,7 +233,8 @@ fi
 script_file="$1"
 shift
 
-# TODO: help argument to describe usage
+# TODO: --help argument to describe usage
+# TODO: --version argument, once I release a version
 
 # ensure the cache dir exists
 script_cache="$HOME/.badash"
@@ -213,6 +298,13 @@ do
   then
     cmd_names="${BASH_REMATCH[1]}"
     add_cmd_requirements "$cmd_names" "$bare_script_name"
+
+  elif [[ "$line" =~ ^(\ *)@wait-for-command\ (.*)$ ]]
+  then
+    padding="${BASH_REMATCH[1]}"
+    command_str="${BASH_REMATCH[2]}"
+    gen-wait-for-command gen_wait_command "$padding" "$command_str"
+    generated_body+=( "$gen_wait_command" )
 
   # TODO: @confirm_y/n
   # but, how to do default for that (specify default yes or no)
