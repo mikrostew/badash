@@ -21,7 +21,8 @@ git merge "$some_branch"
 @exit_on_error "Failed to merge '$some_branch' to master!"
 ```
 
-compiles to:
+<details>
+  <summary>What that compiles to</summary>
 
 ```bash
 #!/usr/bin/env bash
@@ -34,6 +35,7 @@ then
   exit "$exit_code"
 fi
 ```
+</details>
 
 You can also specify a line of code to run before exiting, if you need to clean up anything.
 
@@ -46,7 +48,8 @@ git merge "$some_branch"
 @exit_on_error "Failed to merge '$some_branch' to master!" 'git undo-merge-somehow'
 ```
 
-compiles to:
+<details>
+  <summary>What that compiles to</summary>
 
 ```bash
 #!/usr/bin/env bash
@@ -60,6 +63,7 @@ then
   exit "$exit_code"
 fi
 ```
+</details>
 
 ### @wait_for_keypress
 
@@ -72,14 +76,15 @@ For example:
 @wait_for_keypress 'Press a key to continue...'
 ```
 
-compiles to:
+<details>
+  <summary>What that compiles to</summary>
 
 ```bash
 #!/usr/bin/env bash
 echo -n 'Press a key to continue...'
 read -n1 -s
 ```
-
+</details>
 
 ### system_is_*
 
