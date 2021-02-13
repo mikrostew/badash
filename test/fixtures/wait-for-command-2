@@ -1,0 +1,4 @@
+#!/usr/bin/env badash
+echo "testing wait-for-command"
+@wait-for-command echo "this will not be printed"
+@wait-for-command echo "or this"
