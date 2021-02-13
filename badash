@@ -137,20 +137,6 @@ import_function_lazy() {
   function_imports[$func_name]="$function_text"
 }
 
-# generate code to display a spinner while waiting for a command to finish
-gen-wait-for-command() {
-  # arguments:
-  local varname="$1" # write the generated code to this variable
-  local padding="$2" # generate the code to match the padding of the surrounding code
-  local command_str="$3" # the command line to run
-
-  # just a simple replacement here
-  printf -v "$varname" "%s" "${padding}${WAIT_COMMAND_FUNC_NAME} $command_str"
-
-  # make sure the function that does that is part of imports
-  import_function_lazy "$WAIT_COMMAND_FUNC_NAME" 'gen-wait-command-function'
-}
-
 # generate $WAIT_COMMAND_FUNC_NAME function
 gen-wait-command-function() {
   local retvar="$1" # write the function text to this variable
@@ -262,6 +248,8 @@ while IFS= read -r line
 do
   (( current_line_num++ ))
 
+  # TODO: enable multiple @directives on a line (just change all the 'elif' to 'if'?)
+
   if [ "$current_line_num" == "1" ] && [ "${line:0:2}" == "#!" ]
   then
     # remove the shebang line
@@ -298,12 +286,13 @@ do
     cmd_names="${BASH_REMATCH[1]}"
     add_cmd_requirements "$cmd_names" "$bare_script_name"
 
-  elif [[ "$line" =~ ^(\ *)@wait-for-command\ (.*)$ ]]
+  # display a spinner while waiting for a command to finish
+  elif [[ "$line" =~ @wait-for-command ]]
   then
-    padding="${BASH_REMATCH[1]}"
-    command_str="${BASH_REMATCH[2]}"
-    gen-wait-for-command gen_wait_command "$padding" "$command_str"
-    generated_body+=( "$gen_wait_command" )
+    replaced_directive="${line//@wait-for-command/$WAIT_COMMAND_FUNC_NAME}"
+    generated_body+=( "$replaced_directive" )
+    # make sure the function that does that is part of imports
+    import_function_lazy "$WAIT_COMMAND_FUNC_NAME" 'gen-wait-command-function'
 
   # TODO: @confirm_y/n
   # but, how to do default for that (specify default yes or no)

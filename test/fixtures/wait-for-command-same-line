@@ -1,0 +1,3 @@
+#!/usr/bin/env badash
+echo "testing wait-for-command"
+@wait-for-command echo "first command" && @wait-for-command echo "second command"
