@@ -3,6 +3,7 @@
 Convenience methods, modular imports, and other fun stuff for bash
 
 [Installation](#installation)
+
 [Syntax](#syntax)
 * [@exit_on_error](#exit_on_error)
 * [@wait-for-command](#wait-for-command)
