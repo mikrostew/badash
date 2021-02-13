@@ -10,9 +10,11 @@ Syntax
 
 ### @exit_on_error
 
-This is a convenience method to check the exit code of the command that just completed, and exit with an error message if it failed.
+`@exit_on_error "message if this fails" ['code to run before exit']`
 
-For example:
+(convenience method) Check the exit code of the command that just completed, and exit with an error message if it failed. Optionally run some code before exiting.
+
+Example:
 
 ```bash
 #!/usr/bin/env badash
@@ -39,7 +41,7 @@ fi
 
 You can also specify a line of code to run before exiting, if you need to clean up anything.
 
-For example:
+Example:
 
 ```bash
 #!/usr/bin/env badash
@@ -67,9 +69,11 @@ fi
 
 ### @wait_for_keypress
 
-This is a convenience method to wait for the user to press a key to continue execution of the script.
+`@wait_for_keypress 'Message to prompt the user'`
 
-For example:
+(convenience method) Wait for the user to press a key to continue execution of the script.
+
+Example:
 
 ```bash
 #!/usr/bin/env badash
