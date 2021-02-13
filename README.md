@@ -2,10 +2,19 @@
 
 Convenience methods, modular imports, and other fun stuff for bash
 
-Syntax
+[Installation](#installation)
+[Syntax](#syntax)
 * [@exit_on_error](#exit_on_error)
 * [@wait-for-command](#wait-for-command)
 * [@wait_for_keypress](#wait_for_keypress)
+
+## Installation
+
+```
+cd /usr/local/lib/
+git clone git@github.com:mikrostew/badash.git
+ln -s /usr/local/lib/badash/badash /usr/local/bin/badash
+```
 
 ## Syntax
 
