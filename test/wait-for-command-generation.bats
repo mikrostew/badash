@@ -361,7 +361,6 @@ gen::wait-for-command() {
   fi
 }
 echo "testing wait-for-command"
-# this should always fail
 gen::wait-for-command echo "first command" && gen::wait-for-command echo "second command"
 END_FILE_CONTENTS
   )"
