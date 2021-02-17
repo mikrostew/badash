@@ -20,7 +20,7 @@ teardown() {
 testing wait-for-command
 
    running  'echo this will not be printed'
-   running  'echo this will not be printed' (113ms) [ OK ]
+   ran  'echo this will not be printed' (113ms) [ OK ]
 END_OF_OUTPUT
   )"
 
@@ -68,7 +68,7 @@ gen::wait-for-command() {
   # but still check if it failed?
   #printf "\r%-${total_length}s\r" ' ' >&2
 
-  printf "\r  ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '$cmd_string' (${cmd_run_time}ms)" >&2
+  printf "\r  ${COLOR_FG_BOLD_GREEN}ran${COLOR_RESET} '$cmd_string' (${cmd_run_time}ms)" >&2
 
   # check that the command was successful
   if [ "$exit_code" == 0 ]
@@ -110,10 +110,10 @@ END_FILE_CONTENTS
 testing wait-for-command
 
    running  'echo this will not be printed'
-   running  'echo this will not be printed' (113ms) [ OK ]
+   ran  'echo this will not be printed' (113ms) [ OK ]
 
    running  'echo or this'
-   running  'echo or this' (113ms) [ OK ]
+   ran  'echo or this' (113ms) [ OK ]
 END_OF_OUTPUT
   )"
 
@@ -160,7 +160,7 @@ gen::wait-for-command() {
   # but still check if it failed?
   #printf "\r%-${total_length}s\r" ' ' >&2
 
-  printf "\r  ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '$cmd_string' (${cmd_run_time}ms)" >&2
+  printf "\r  ${COLOR_FG_BOLD_GREEN}ran${COLOR_RESET} '$cmd_string' (${cmd_run_time}ms)" >&2
 
   # check that the command was successful
   if [ "$exit_code" == 0 ]
@@ -204,7 +204,7 @@ END_FILE_CONTENTS
 testing wait-for-command
 
    running  './test/fixtures/fail-with-output.sh'
-   running  './test/fixtures/fail-with-output.sh' (113ms) [ ERROR ]
+   ran  './test/fixtures/fail-with-output.sh' (113ms) [ ERROR ]
 stdout text
 stderr text
 END_OF_OUTPUT
@@ -253,7 +253,7 @@ gen::wait-for-command() {
   # but still check if it failed?
   #printf "\r%-${total_length}s\r" ' ' >&2
 
-  printf "\r  ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '$cmd_string' (${cmd_run_time}ms)" >&2
+  printf "\r  ${COLOR_FG_BOLD_GREEN}ran${COLOR_RESET} '$cmd_string' (${cmd_run_time}ms)" >&2
 
   # check that the command was successful
   if [ "$exit_code" == 0 ]
