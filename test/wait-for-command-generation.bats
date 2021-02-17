@@ -298,10 +298,10 @@ END_FILE_CONTENTS
 testing wait-for-command
 
    running  'echo first command'
-   running  'echo first command' (113ms) [ OK ]
+   ran  'echo first command' (113ms) [ OK ]
 
    running  'echo second command'
-   running  'echo second command' (113ms) [ OK ]
+   ran  'echo second command' (113ms) [ OK ]
 END_OF_OUTPUT
   )"
 
@@ -348,7 +348,7 @@ gen::wait-for-command() {
   # but still check if it failed?
   #printf "\r%-${total_length}s\r" ' ' >&2
 
-  printf "\r  ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '$cmd_string' (${cmd_run_time}ms)" >&2
+  printf "\r  ${COLOR_FG_BOLD_GREEN}ran${COLOR_RESET} '$cmd_string' (${cmd_run_time}ms)" >&2
 
   # check that the command was successful
   if [ "$exit_code" == 0 ]
