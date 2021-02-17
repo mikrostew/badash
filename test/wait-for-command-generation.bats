@@ -35,7 +35,14 @@ if [ "$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
 # show a busy spinner while command is running
 # and only show output if there is an error
 gen::wait-for-command() {
-  # input is a command array
+  # flags
+  #  --show-output: always show command output
+  if [ "$1" == "--show-output" ]
+  then
+    local show_output="true"
+    shift
+  fi
+  # rest of the input is a command array
   local cmd_string="$@"
 
   # calculate things for the output
@@ -127,7 +134,14 @@ if [ "$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
 # show a busy spinner while command is running
 # and only show output if there is an error
 gen::wait-for-command() {
-  # input is a command array
+  # flags
+  #  --show-output: always show command output
+  if [ "$1" == "--show-output" ]
+  then
+    local show_output="true"
+    shift
+  fi
+  # rest of the input is a command array
   local cmd_string="$@"
 
   # calculate things for the output
@@ -220,7 +234,14 @@ if [ "$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
 # show a busy spinner while command is running
 # and only show output if there is an error
 gen::wait-for-command() {
-  # input is a command array
+  # flags
+  #  --show-output: always show command output
+  if [ "$1" == "--show-output" ]
+  then
+    local show_output="true"
+    shift
+  fi
+  # rest of the input is a command array
   local cmd_string="$@"
 
   # calculate things for the output
@@ -315,7 +336,14 @@ if [ "$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
 # show a busy spinner while command is running
 # and only show output if there is an error
 gen::wait-for-command() {
-  # input is a command array
+  # flags
+  #  --show-output: always show command output
+  if [ "$1" == "--show-output" ]
+  then
+    local show_output="true"
+    shift
+  fi
+  # rest of the input is a command array
   local cmd_string="$@"
 
   # calculate things for the output
