@@ -1,3 +1,3 @@
 #!/usr/bin/env badash
 
-if @system_is_DonKEY?; then echo "nope"; else echo "$(uname -s)"; fi
+if @system-is-DonKEY?; then echo "nope"; else echo "$(uname -s)"; fi

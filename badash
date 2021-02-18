@@ -287,7 +287,7 @@ do
     system_lowercase="$(echo "$system" | tr '[:upper:]' '[:lower:]')"
     # for example:
     # @system-is-Darwin?  -->  [ "$(uname -s | tr [:upper:] [:lower:])" == "darwin" ]
-    replaced_test="${line/@system_is_$system?/[ \"\$(uname -s | tr '[:upper:]' '[:lower:]')\" == \"$system_lowercase\" ]}"
+    replaced_test="${line/@system-is-$system?/[ \"\$(uname -s | tr '[:upper:]' '[:lower:]')\" == \"$system_lowercase\" ]}"
     generated_body+=( "$replaced_test" )
 
   # exit with an error message if the previous command failed
