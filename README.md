@@ -80,9 +80,13 @@ fi
 
 ### @wait-for-command
 
-`@wait-for-command command to run`
+`@wait-for-command [options] command to run`
 
 (convenience method) Wait for a long-running command to finish, displaying a spinner while it runs. Show the output only on error.
+
+**Options**
+
+`--show-output` By default, command output is hidden unless it returns an error code. This option will also show the command output if the command is successful.
 
 Example:
 
@@ -104,6 +108,13 @@ if [ "$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
 # show a busy spinner while command is running
 # and only show output if there is an error
 gen::wait-for-command() {
+  # flags
+  #  --show-output: always show command output
+  if [ "$1" == "--show-output" ]
+  then
+    local show_output="true"
+    shift
+  fi
   # input is a command array
   local cmd_string="$@"
 
@@ -143,6 +154,8 @@ gen::wait-for-command() {
   if [ "$exit_code" == 0 ]
   then
     printf " [${COLOR_FG_GREEN}OK${COLOR_RESET}]\n"
+    # show output if configured
+    if [ "$show_output" == "true" ]; then cat <&3; fi
   else
     printf " [${COLOR_FG_RED}ERROR${COLOR_RESET}]\n"
     # if it fails, show the command output
