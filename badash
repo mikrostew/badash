@@ -5,6 +5,9 @@
 REQ_CHECK_FUNC_NAME="gen::req_check"
 WAIT_COMMAND_FUNC_NAME="gen::wait-for-command"
 
+# colors
+COLOR_RESET='\033[0m'
+COLOR_FG_YELLOW='\033[0;33m'
 
 ########## FUNCTIONS ##########
 
@@ -268,10 +271,22 @@ do
   # (which is case-insensitive, so @system_is_Darwin? == @system_is_DARWIN? == @system_is_darwin?)
   elif [[ "$line" =~ @system_is_(.*)\? ]]
   then
+    echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@system_is_*' is now '@system-is-*' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
     system="${BASH_REMATCH[1]}"
     system_lowercase="$(echo "$system" | tr '[:upper:]' '[:lower:]')"
     # for example:
     # @system_is_Darwin?  -->  [ "$(uname -s | tr [:upper:] [:lower:])" == "darwin" ]
+    replaced_test="${line/@system_is_$system?/[ \"\$(uname -s | tr '[:upper:]' '[:lower:]')\" == \"$system_lowercase\" ]}"
+    generated_body+=( "$replaced_test" )
+
+  # generate code for @system-is-darwin?, @system-is-linux?, etc.
+  # (which is case-insensitive, so @system-is-Darwin? == @system-is-DARWIN? == @system-is-darwin?)
+  elif [[ "$line" =~ @system-is-(.*)\? ]]
+  then
+    system="${BASH_REMATCH[1]}"
+    system_lowercase="$(echo "$system" | tr '[:upper:]' '[:lower:]')"
+    # for example:
+    # @system-is-Darwin?  -->  [ "$(uname -s | tr [:upper:] [:lower:])" == "darwin" ]
     replaced_test="${line/@system_is_$system?/[ \"\$(uname -s | tr '[:upper:]' '[:lower:]')\" == \"$system_lowercase\" ]}"
     generated_body+=( "$replaced_test" )
 
