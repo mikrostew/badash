@@ -201,6 +201,8 @@ $WAIT_COMMAND_FUNC_NAME() {
   if [ "\$exit_code" == 0 ]
   then
     printf " [\${COLOR_FG_GREEN}OK\${COLOR_RESET}]\\\\n"
+    # show output if configured
+    if [ "\$show_output" == "true" ]; then cat <&3; fi
   else
     printf " [\${COLOR_FG_RED}ERROR\${COLOR_RESET}]\\\\n"
     # if it fails, show the command output
