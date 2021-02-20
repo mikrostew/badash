@@ -7,7 +7,7 @@ Convenience methods, modular imports, and other fun stuff for bash
 [Syntax](#syntax)
 * [@exit-on-error](#exit-on-error)
 * [@wait-for-command](#wait-for-command)
-* [@wait_for_keypress](#wait_for_keypress)
+* [@wait-for-keypress](#wait-for-keypress)
 
 ## Installation
 
@@ -167,9 +167,9 @@ gen::wait-for-command brew update
 </details>
 
 
-### @wait_for_keypress
+### @wait-for-keypress
 
-`@wait_for_keypress 'Message to prompt the user'`
+`@wait-for-keypress 'Message to prompt the user'`
 
 (convenience method) Wait for the user to press a key to continue execution of the script.
 
@@ -177,7 +177,7 @@ Example:
 
 ```bash
 #!/usr/bin/env badash
-@wait_for_keypress 'Press a key to continue...'
+@wait-for-keypress 'Press a key to continue...'
 ```
 
 <details>

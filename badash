@@ -63,7 +63,7 @@ END_GEN_CODE
 }
 
 # generate code to wait for a keypress
-gen_wait_for_keypress() {
+gen-wait-for-keypress() {
   # arguments:
   local varname="$1" # write the generated code to this variable
   local padding="$2" # generate the code to match the padding of the surrounding code
@@ -290,7 +290,7 @@ do
     replaced_test="${line/@system-is-$system?/[ \"\$(uname -s | tr '[:upper:]' '[:lower:]')\" == \"$system_lowercase\" ]}"
     generated_body+=( "$replaced_test" )
 
-  # exit with an error message if the previous command failed
+  # DEPRECATED
   elif [[ "$line" =~ ^(\ *)@exit_on_error\ *(.*)$ ]]
   then
     echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@exit_on_error' is now '@exit-on-error' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
@@ -307,11 +307,21 @@ do
     gen-exit-on-error gen_exit "$padding" "$exit_info_strings"
     generated_body+=( "$gen_exit" )
 
+  # DEPRECATED
   elif [[ "$line" =~ ^(\ *)@wait_for_keypress\ (.*)$ ]]
   then
+    echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@wait_for_keypress' is now '@wait-for-keypress' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
     padding="${BASH_REMATCH[1]}"
     prompt_str="${BASH_REMATCH[2]}"
     gen_wait_for_keypress gen_keypress "$padding" "$prompt_str"
+    generated_body+=( "$gen_keypress" )
+
+  # wait for the user to press a key
+  elif [[ "$line" =~ ^(\ *)@wait-for-keypress\ (.*)$ ]]
+  then
+    padding="${BASH_REMATCH[1]}"
+    prompt_str="${BASH_REMATCH[2]}"
+    gen-wait-for-keypress gen_keypress "$padding" "$prompt_str"
     generated_body+=( "$gen_keypress" )
 
   elif [[ "$line" =~ ^@uses_cmds\ (.*)$ ]]
