@@ -5,7 +5,7 @@ Convenience methods, modular imports, and other fun stuff for bash
 [Installation](#installation)
 
 [Syntax](#syntax)
-* [@exit_on_error](#exit_on_error)
+* [@exit-on-error](#exit-on-error)
 * [@wait-for-command](#wait-for-command)
 * [@wait_for_keypress](#wait_for_keypress)
 
@@ -19,9 +19,9 @@ ln -s /usr/local/lib/badash/badash /usr/local/bin/badash
 
 ## Syntax
 
-### @exit_on_error
+### @exit-on-error
 
-`@exit_on_error "message if this fails" ['code to run before exit']`
+`@exit-on-error "message if this fails" ['code to run before exit']`
 
 (convenience method) Check the exit code of the command that just completed, and exit with an error message if it failed. Optionally run some code before exiting.
 
@@ -31,7 +31,7 @@ Example:
 #!/usr/bin/env badash
 git checkout master
 git merge "$some_branch"
-@exit_on_error "Failed to merge '$some_branch' to master!"
+@exit-on-error "Failed to merge '$some_branch' to master!"
 ```
 
 <details>
@@ -58,7 +58,7 @@ Example:
 #!/usr/bin/env badash
 git checkout master
 git merge "$some_branch"
-@exit_on_error "Failed to merge '$some_branch' to master!" 'git undo-merge-somehow'
+@exit-on-error "Failed to merge '$some_branch' to master!" 'git undo-merge-somehow'
 ```
 
 <details>

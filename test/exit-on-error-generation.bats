@@ -13,8 +13,8 @@ teardown() {
 # TODO: test line containing comment (probably fails ATM)
 
 
-# generate code for "@exit_on_error 'some msg'"
-@test "@exit_on_error - message only" {
+# generate code for "@exit-on-error 'some msg'"
+@test "@exit-on-error - message only" {
   bash_script="test/fixtures/exit-on-error-msg"
   generated_file="$tmpdir/.badash/exit-on-error-msg"
 
@@ -47,8 +47,8 @@ END_FILE_CONTENTS
 }
 
 
-# generate code for "@exit_on_error 'some msg' 'some code'"
-@test "@exit_on_error - message and code" {
+# generate code for "@exit-on-error 'some msg' 'some code'"
+@test "@exit-on-error - message and code" {
   bash_script="test/fixtures/exit-on-error-msg-code"
   generated_file="$tmpdir/.badash/exit-on-error-msg-code"
 
@@ -81,14 +81,14 @@ END_FILE_CONTENTS
 }
 
 
-# test error for "@exit_on_error" with no strings provided
-@test "@exit_on_error - no strings" {
+# test error for "@exit-on-error" with no strings provided
+@test "@exit-on-error - no strings" {
   bash_script="test/fixtures/exit-on-error-no-strings"
   generated_file="$tmpdir/.badash/exit-on-error-no-strings"
 
   expected_output="$(cat <<'END_OF_OUTPUT'
 
-badash: Wrong number of arguments to @exit_on_error: expected 1 or 2, got 0
+badash: Wrong number of arguments to @exit-on-error: expected 1 or 2, got 0
 END_OF_OUTPUT
   )"
 
@@ -100,14 +100,14 @@ END_OF_OUTPUT
 }
 
 
-# test error for "@exit_on_error" with too many strings provided
-@test "@exit_on_error - too many strings" {
+# test error for "@exit-on-error" with too many strings provided
+@test "@exit-on-error - too many strings" {
   bash_script="test/fixtures/exit-on-error-3-strings"
   generated_file="$tmpdir/.badash/exit-on-error-3-strings"
 
   expected_output="$(cat <<'END_OF_OUTPUT'
 
-badash: Wrong number of arguments to @exit_on_error: expected 1 or 2, got 3
+badash: Wrong number of arguments to @exit-on-error: expected 1 or 2, got 3
 END_OF_OUTPUT
   )"
 

@@ -12,7 +12,7 @@ COLOR_FG_YELLOW='\033[0;33m'
 ########## FUNCTIONS ##########
 
 # generate code to exit with a message if there is an error
-gen_exit_on_error() {
+gen-exit-on-error() {
   # arguments:
   local varname="$1" # write the generated code to this variable
   local padding="$2" # generate the code to match the padding of the surrounding code
@@ -21,7 +21,7 @@ gen_exit_on_error() {
   if [ -z "$exit_info" ]
   then
     echo "" >&2
-    echo "badash: Wrong number of arguments to @exit_on_error: expected 1 or 2, got 0" >&2
+    echo "badash: Wrong number of arguments to @exit-on-error: expected 1 or 2, got 0" >&2
     exit 1
   fi
 
@@ -42,7 +42,7 @@ gen_exit_on_error() {
     run_code="${exit_options[1]}"
   else
     echo "" >&2
-    echo "badash: Wrong number of arguments to @exit_on_error: expected 1 or 2, got $num_exit_strings" >&2
+    echo "badash: Wrong number of arguments to @exit-on-error: expected 1 or 2, got $num_exit_strings" >&2
     exit 1
   fi
 
@@ -293,9 +293,18 @@ do
   # exit with an error message if the previous command failed
   elif [[ "$line" =~ ^(\ *)@exit_on_error\ *(.*)$ ]]
   then
+    echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@exit_on_error' is now '@exit-on-error' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
     padding="${BASH_REMATCH[1]}"
     exit_info_strings="${BASH_REMATCH[2]}"
-    gen_exit_on_error gen_exit "$padding" "$exit_info_strings"
+    gen-exit-on-error gen_exit "$padding" "$exit_info_strings"
+    generated_body+=( "$gen_exit" )
+
+  # exit with an error message if the previous command failed
+  elif [[ "$line" =~ ^(\ *)@exit-on-error\ *(.*)$ ]]
+  then
+    padding="${BASH_REMATCH[1]}"
+    exit_info_strings="${BASH_REMATCH[2]}"
+    gen-exit-on-error gen_exit "$padding" "$exit_info_strings"
     generated_body+=( "$gen_exit" )
 
   elif [[ "$line" =~ ^(\ *)@wait_for_keypress\ (.*)$ ]]
