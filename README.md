@@ -6,9 +6,11 @@ Convenience methods, modular imports, and other fun stuff for bash
 
 [Syntax](#syntax)
 * [@exit-on-error](#exit-on-error)
+* [@system-is-](#system-is-)
 * [@uses-cmds](#uses-cmds)
 * [@wait-for-command](#wait-for-command)
 * [@wait-for-keypress](#wait-for-keypress)
+[Development](#development)
 
 ## Installation
 
@@ -78,6 +80,10 @@ then
 fi
 ```
 </details>
+
+### @system-is-*
+
+TODO
 
 ### @uses-cmds
 
@@ -194,10 +200,6 @@ echo -n 'Press a key to continue...'
 read -n1 -s
 ```
 </details>
-
-### system_is_*
-
-TODO
 
 
 ## Development
