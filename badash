@@ -2,7 +2,7 @@
 
 # TODO: what things should I set here, like pipefail and lastpipe and so forth?
 
-REQ_CHECK_FUNC_NAME="gen::req_check"
+REQ_CHECK_FUNC_NAME="gen::req-check"
 WAIT_COMMAND_FUNC_NAME="gen::wait-for-command"
 
 # colors
@@ -97,11 +97,11 @@ add-cmd-requirements() {
   done
 
   # make sure the function that checks requirements is part of imports
-  import_function_lazy "$REQ_CHECK_FUNC_NAME" 'gen_requirement_check' "$calling_script"
+  import-function-lazy "$REQ_CHECK_FUNC_NAME" 'gen-requirement-check' "$calling_script"
 }
 
 # generate function to check for required commands in the script
-gen_requirement_check() {
+gen-requirement-check() {
   local retvar="$1" # write the function text to this variable
   local script_name="$2"
 
@@ -121,7 +121,7 @@ END_OF_REQ_CHECK
 }
 
 # import a function if it has not already been imported
-import_function_lazy() {
+import-function-lazy() {
   # arguments:
   local func_name="$1"
   local gen_func_name="$2" # command to run to import the function
@@ -342,7 +342,7 @@ do
     replaced_directive="${line//@wait-for-command/$WAIT_COMMAND_FUNC_NAME}"
     generated_body+=( "$replaced_directive" )
     # make sure the function that does that is part of imports
-    import_function_lazy "$WAIT_COMMAND_FUNC_NAME" 'gen-wait-command-function'
+    import-function-lazy "$WAIT_COMMAND_FUNC_NAME" 'gen-wait-command-function'
 
   # TODO: @confirm_y/n
   # but, how to do default for that (specify default yes or no)
