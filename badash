@@ -83,7 +83,7 @@ END_GEN_CODE
 }
 
 # add a command to the list of requirements
-add_cmd_requirements() {
+add-cmd-requirements() {
   local cmd_names_string="$1"
   local calling_script="$2"
 
@@ -267,8 +267,7 @@ do
     # remove the shebang line
     continue
 
-  # generate code for @system_is_darwin?, @system_is_linux?, etc.
-  # (which is case-insensitive, so @system_is_Darwin? == @system_is_DARWIN? == @system_is_darwin?)
+  # DEPRECATED
   elif [[ "$line" =~ @system_is_(.*)\? ]]
   then
     echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@system_is_*' is now '@system-is-*' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
@@ -324,10 +323,18 @@ do
     gen-wait-for-keypress gen_keypress "$padding" "$prompt_str"
     generated_body+=( "$gen_keypress" )
 
+  # DEPRECATED
   elif [[ "$line" =~ ^@uses_cmds\ (.*)$ ]]
   then
+    echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@uses_cmds' is now '@uses-cmds' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
     cmd_names="${BASH_REMATCH[1]}"
-    add_cmd_requirements "$cmd_names" "$bare_script_name"
+    add-cmd-requirements "$cmd_names" "$bare_script_name"
+
+  # check that commands exist before using them
+  elif [[ "$line" =~ ^@uses-cmds\ (.*)$ ]]
+  then
+    cmd_names="${BASH_REMATCH[1]}"
+    add-cmd-requirements "$cmd_names" "$bare_script_name"
 
   # display a spinner while waiting for a command to finish
   elif [[ "$line" =~ @wait-for-command ]]

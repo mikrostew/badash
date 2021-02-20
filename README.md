@@ -6,6 +6,7 @@ Convenience methods, modular imports, and other fun stuff for bash
 
 [Syntax](#syntax)
 * [@exit-on-error](#exit-on-error)
+* [@uses-cmds](#uses-cmds)
 * [@wait-for-command](#wait-for-command)
 * [@wait-for-keypress](#wait-for-keypress)
 
@@ -77,6 +78,10 @@ then
 fi
 ```
 </details>
+
+### @uses-cmds
+
+TODO
 
 ### @wait-for-command
 

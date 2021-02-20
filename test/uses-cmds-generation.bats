@@ -13,7 +13,7 @@ teardown() {
 
 # one command
 
-@test "@uses_cmds - one command" {
+@test "@uses-cmds - one command" {
   bash_script="test/fixtures/uses-cmds-one-cmd"
   generated_file="$tmpdir/.badash/uses-cmds-one-cmd"
 
@@ -46,7 +46,7 @@ END_FILE_CONTENTS
 
 # two commands
 
-@test "@uses_cmds - two commands" {
+@test "@uses-cmds - two commands" {
   bash_script="test/fixtures/uses-cmds-two-cmds"
   generated_file="$tmpdir/.badash/uses-cmds-two-cmds"
 
@@ -79,7 +79,7 @@ END_FILE_CONTENTS
 
 # cmds for specific OSs
 
-@test "@uses_cmds - specific OS" {
+@test "@uses-cmds - specific OS" {
   bash_script="test/fixtures/uses-cmds-with-os"
   generated_file="$tmpdir/.badash/uses-cmds-with-os"
 
@@ -114,7 +114,7 @@ END_FILE_CONTENTS
 
 # command doesn't exist
 
-@test "@uses_cmds - command doesn't exist" {
+@test "@uses-cmds - command doesn't exist" {
   bash_script="test/fixtures/uses-cmds-no-exist"
   generated_file="$tmpdir/.badash/uses-cmds-no-exist"
 
