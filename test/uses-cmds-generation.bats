@@ -97,9 +97,9 @@ gen::req_check() {
   fi
 }
 _gen_cmd_check_rtn=0
-gen::req_check _gen_cmd_check_rtn jq
-[ "$(uname -s)" == 'Linux' ] && gen::req_check _gen_cmd_check_rtn grep
 [ "$(uname -s)" == 'Darwin' ] && gen::req_check _gen_cmd_check_rtn sed
+[ "$(uname -s)" == 'Linux' ] && gen::req_check _gen_cmd_check_rtn grep
+gen::req_check _gen_cmd_check_rtn jq
 if [ "$_gen_cmd_check_rtn" != 0 ]; then exit $_gen_cmd_check_rtn; fi
 echo "should execute"
 END_FILE_CONTENTS

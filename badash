@@ -374,11 +374,10 @@ do
 done
 
 # generate the requirement check code
-generated_reqs=()
+cmd_reqs=()
 if [ "${#cmd_requirements[@]}" -gt 0 ]
 then
   # add the checks for command requirements
-  generated_reqs+=( '_gen_cmd_check_rtn=0' )
   for cmd_name in "${!cmd_requirements[@]}"
   do
     # platform-specific commands
@@ -387,12 +386,17 @@ then
       os_for_cmd="${BASH_REMATCH[1]}"
       actual_command="${BASH_REMATCH[2]}"
       # check the OS first before checking the cmd
-      generated_reqs+=( "[ \"\$(uname -s)\" == '$os_for_cmd' ] && $REQ_CHECK_FUNC_NAME _gen_cmd_check_rtn $actual_command" )
+      cmd_reqs+=( "[ \"\$(uname -s)\" == '$os_for_cmd' ] && $REQ_CHECK_FUNC_NAME _gen_cmd_check_rtn $actual_command" )
     else
-      generated_reqs+=( "$REQ_CHECK_FUNC_NAME _gen_cmd_check_rtn $cmd_name" )
+      cmd_reqs+=( "$REQ_CHECK_FUNC_NAME _gen_cmd_check_rtn $cmd_name" )
     fi
   done
-  generated_reqs+=( 'if [ "$_gen_cmd_check_rtn" != 0 ]; then exit $_gen_cmd_check_rtn; fi' )
+  # sort those so they are predictable for testing
+  # (from https://stackoverflow.com/a/11789688)
+  IFS=$'\n' sorted_reqs=($(sort <<<"${cmd_reqs[*]}"))
+  unset IFS
+
+  generated_reqs=( '_gen_cmd_check_rtn=0' "${sorted_reqs[@]}" 'if [ "$_gen_cmd_check_rtn" != 0 ]; then exit $_gen_cmd_check_rtn; fi' )
 fi
 
 
