@@ -124,7 +124,7 @@ gen::wait-for-command() {
     local show_output="true"
     shift
   fi
-  # input is a command array
+  # rest of the input is a command array
   local cmd_string="$@"
 
   # calculate things for the output
@@ -132,43 +132,49 @@ gen::wait-for-command() {
   local num_chars=${#spin_chars}
   local total_length=$(( 2 + ${#cmd_string} ))
 
-  # run the command async, and capture the PID
+  # capture when the command was started
   local cmd_start_time=$($DATE_CMD +%s%3N)
-  exec 3< <("$@" 2>&1)
-  local cmd_pid="$!"
 
-  # wait for the command to complete, showing a busy spinner
-  i=0
-  while kill -0 $cmd_pid 2>/dev/null
-  do
-    i=$(( (i + 1) % num_chars ))
-    printf "\r${spin_chars:$i:1} ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '${cmd_string}'" >&2
-    sleep 0.1
-  done
+  # start the spinner running async, and get its PID
+  (
+    # wait for the command to complete, showing a busy spinner
+    i=0
+    while :
+    do
+      i=$(( (i + 1) % num_chars ))
+      printf "\r${spin_chars:$i:1} ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '${cmd_string}'" >&2
+      sleep 0.1
+    done
+  ) & disown
+  local spinner_pid="$!"
+
+  # run the command, capturing its output (both stdout and stderr)
+  cmd_output="$("$@" 2>&1)"
+  local exit_code="$?"
+
+  # kill the spinner process
+  kill "$spinner_pid"
+
   # calculate total runtime (approx)
   local cmd_stop_time=$($DATE_CMD +%s%3N)
   local cmd_run_time=$((cmd_stop_time - cmd_start_time))
-
-  # get the exit code of that process
-  wait $cmd_pid
-  local exit_code="$?"
 
   # TODO: attempt to clean up, depending on option (doesn't always work)
   # but still check if it failed?
   #printf "\r%-${total_length}s\r" ' ' >&2
 
-  printf "\r  ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '$cmd_string' (${cmd_run_time}ms)" >&2
+  printf "\r  ${COLOR_FG_BOLD_GREEN}ran${COLOR_RESET} '$cmd_string' (${cmd_run_time}ms)" >&2
 
   # check that the command was successful
   if [ "$exit_code" == 0 ]
   then
     printf " [${COLOR_FG_GREEN}OK${COLOR_RESET}]\n"
     # show output if configured
-    if [ "$show_output" == "true" ]; then cat <&3; fi
+    if [ "$show_output" == "true" ]; then echo "$cmd_output"; fi
   else
     printf " [${COLOR_FG_RED}ERROR${COLOR_RESET}]\n"
     # if it fails, show the command output
-    cat <&3
+    echo "$cmd_output"
   fi
 }
 gen::wait-for-command brew update
