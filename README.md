@@ -12,7 +12,9 @@ Convenience methods, modular imports, and other fun stuff for bash
 * [@wait-for-keypress](#wait-for-keypress)
 [Development](#development)
 
-## Installation
+# Installation
+
+(you may need to make `/usr/local/lib` and `/usr/local/bin` writeable first)
 
 ```
 cd /usr/local/lib/
@@ -20,9 +22,9 @@ git clone git@github.com:mikrostew/badash.git
 ln -s /usr/local/lib/badash/badash /usr/local/bin/badash
 ```
 
-## Syntax
+# Syntax
 
-### @exit-on-error
+## @exit-on-error
 
 `@exit-on-error "message if this fails" ['code to run before exit']`
 
@@ -81,15 +83,51 @@ fi
 ```
 </details>
 
-### @system-is-*
+## @system-is-*
+
+`@system-is-<uname-string>`
+
+(convenience method) Test the uname string of the current system. This is case insensitive, so `@system-is-darwin` == `@system-is-Darwin`.
+
+Example:
+
+```bash
+#!/usr/bin/env badash
+if @system-is-darwin
+then
+  echo "we're on Mac!"
+elif @system-is-linux
+then
+  echo "we're on Linux!"
+else
+  echo "unknown system!!"
+fi
+```
+
+<details>
+  <summary>What that compiles to</summary>
+
+```bash
+#!/usr/bin/env bash
+if [ "$(uname -s | tr '[:upper:]' '[:lower:]')" == "darwin" ]
+then
+  echo "we're on Mac!"
+elif [ "$(uname -s | tr '[:upper:]' '[:lower:]')" == "linux" ]
+then
+  echo "we're on Linux!"
+else
+  echo "unknown system!!"
+fi
+```
+</details>
+
+
+## @uses-cmds
 
 TODO
 
-### @uses-cmds
 
-TODO
-
-### @wait-for-command
+## @wait-for-command
 
 `@wait-for-command [options] command to run`
 
@@ -178,7 +216,7 @@ gen::wait-for-command brew update
 </details>
 
 
-### @wait-for-keypress
+## @wait-for-keypress
 
 `@wait-for-keypress 'Message to prompt the user'`
 
@@ -202,9 +240,9 @@ read -n1 -s
 </details>
 
 
-## Development
+# Development
 
-### Tests
+## Tests
 
 To run the tests, install [bats-core](https://github.com/bats-core/bats-core), and run this command from the top-level project directory:
 
