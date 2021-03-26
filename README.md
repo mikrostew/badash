@@ -4,12 +4,15 @@ Convenience methods, modular imports, and other fun stuff for bash
 
 [Installation](#installation)
 
-[Syntax](#syntax)
+[Convenience Methods](#convenience-methods)
 * [@exit-on-error](#exit-on-error)
-* [@system-is-](#system-is-)
-* [@uses-cmds](#uses-cmds)
 * [@wait-for-command](#wait-for-command)
 * [@wait-for-keypress](#wait-for-keypress)
+
+[Tests and Checks](#tests-and-checks)
+* [@system-is-\*](#system-is-)
+* [@uses-cmds](#uses-cmds)
+
 [Development](#development)
 
 # Installation
@@ -22,7 +25,7 @@ git clone git@github.com:mikrostew/badash.git
 ln -s /usr/local/lib/badash/badash /usr/local/bin/badash
 ```
 
-# Syntax
+# Convenience Methods
 
 ## @exit-on-error
 
@@ -82,49 +85,6 @@ then
 fi
 ```
 </details>
-
-## @system-is-*
-
-`@system-is-<uname-string>`
-
-(convenience method) Test the uname string of the current system. This is case insensitive, so `@system-is-darwin` == `@system-is-Darwin`.
-
-Example:
-
-```bash
-#!/usr/bin/env badash
-if @system-is-darwin
-then
-  echo "we're on Mac!"
-elif @system-is-linux
-then
-  echo "we're on Linux!"
-else
-  echo "unknown system!!"
-fi
-```
-
-<details>
-  <summary>What that compiles to</summary>
-
-```bash
-#!/usr/bin/env bash
-if [ "$(uname -s | tr '[:upper:]' '[:lower:]')" == "darwin" ]
-then
-  echo "we're on Mac!"
-elif [ "$(uname -s | tr '[:upper:]' '[:lower:]')" == "linux" ]
-then
-  echo "we're on Linux!"
-else
-  echo "unknown system!!"
-fi
-```
-</details>
-
-
-## @uses-cmds
-
-TODO
 
 
 ## @wait-for-command
@@ -238,6 +198,104 @@ echo -n 'Press a key to continue...'
 read -n1 -s
 ```
 </details>
+
+
+# Tests and Checks
+
+## @system-is-*
+
+`@system-is-<uname-string>`
+
+(test) Test the uname string of the current system. This is case insensitive, so `@system-is-darwin` == `@system-is-Darwin`.
+
+Example:
+
+```bash
+#!/usr/bin/env badash
+if @system-is-darwin
+then
+  echo "we're on Mac!"
+elif @system-is-linux
+then
+  echo "we're on Linux!"
+else
+  echo "unknown system!!"
+fi
+```
+
+<details>
+  <summary>What that compiles to</summary>
+
+```bash
+#!/usr/bin/env bash
+if [ "$(uname -s | tr '[:upper:]' '[:lower:]')" == "darwin" ]
+then
+  echo "we're on Mac!"
+elif [ "$(uname -s | tr '[:upper:]' '[:lower:]')" == "linux" ]
+then
+  echo "we're on Linux!"
+else
+  echo "unknown system!!"
+fi
+```
+</details>
+
+
+## @uses-cmds
+
+`@uses-cmds [system/]command [[system/]command] ... `
+
+(check) Check that commands exist before using them. Can be comma or space delimited, and you can specify a certain system to check.
+
+Example:
+
+```bash
+#!/usr/bin/env badash
+@uses-cmds git jq Linux/date Darwin/gdate
+
+git status
+echo '{"some":"JSON"}' | jq '.'
+
+# show the current date
+if [ "$(uname -s)" == "Darwin" ]
+then
+  gdate
+else
+  date
+fi
+```
+
+<details>
+  <summary>What that compiles to</summary>
+
+```bash
+#!/usr/bin/env bash
+gen::req-check() {
+  if [ ! $(command -v $2) ]; then
+    echo "test-compile: Required command '$2' not found" >&2
+    printf -v "$1" "1"
+  fi
+}
+_gen_cmd_check_rtn=0
+[ "$(uname -s)" == 'Darwin' ] && gen::req-check _gen_cmd_check_rtn gdate
+[ "$(uname -s)" == 'Linux' ] && gen::req-check _gen_cmd_check_rtn date
+gen::req-check _gen_cmd_check_rtn git
+gen::req-check _gen_cmd_check_rtn jq
+if [ "$_gen_cmd_check_rtn" != 0 ]; then exit $_gen_cmd_check_rtn; fi
+
+git status
+echo '{"some":"JSON"}' | jq '.'
+
+# show the current date
+if [ "$(uname -s)" == "Darwin" ]
+then
+  gdate
+else
+  date
+fi
+```
+</details>
+
 
 
 # Development
