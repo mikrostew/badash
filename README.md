@@ -4,12 +4,20 @@ Convenience methods, modular imports, and other fun stuff for bash
 
 [Installation](#installation)
 
-[Syntax](#syntax)
-* [@exit_on_error](#exit_on_error)
+[Convenience Methods](#convenience-methods)
+* [@exit-on-error](#exit-on-error)
 * [@wait-for-command](#wait-for-command)
-* [@wait_for_keypress](#wait_for_keypress)
+* [@wait-for-keypress](#wait-for-keypress)
 
-## Installation
+[Tests and Checks](#tests-and-checks)
+* [@system-is-\*](#system-is-)
+* [@uses-cmds](#uses-cmds)
+
+[Development](#development)
+
+# Installation
+
+(you may need to make `/usr/local/lib` and `/usr/local/bin` writeable first)
 
 ```
 cd /usr/local/lib/
@@ -17,11 +25,11 @@ git clone git@github.com:mikrostew/badash.git
 ln -s /usr/local/lib/badash/badash /usr/local/bin/badash
 ```
 
-## Syntax
+# Convenience Methods
 
-### @exit_on_error
+## @exit-on-error
 
-`@exit_on_error "message if this fails" ['code to run before exit']`
+`@exit-on-error "message if this fails" ['code to run before exit']`
 
 (convenience method) Check the exit code of the command that just completed, and exit with an error message if it failed. Optionally run some code before exiting.
 
@@ -31,7 +39,7 @@ Example:
 #!/usr/bin/env badash
 git checkout master
 git merge "$some_branch"
-@exit_on_error "Failed to merge '$some_branch' to master!"
+@exit-on-error "Failed to merge '$some_branch' to master!"
 ```
 
 <details>
@@ -58,7 +66,7 @@ Example:
 #!/usr/bin/env badash
 git checkout master
 git merge "$some_branch"
-@exit_on_error "Failed to merge '$some_branch' to master!" 'git undo-merge-somehow'
+@exit-on-error "Failed to merge '$some_branch' to master!" 'git undo-merge-somehow'
 ```
 
 <details>
@@ -78,7 +86,8 @@ fi
 ```
 </details>
 
-### @wait-for-command
+
+## @wait-for-command
 
 `@wait-for-command [options] command to run`
 
@@ -167,9 +176,9 @@ gen::wait-for-command brew update
 </details>
 
 
-### @wait_for_keypress
+## @wait-for-keypress
 
-`@wait_for_keypress 'Message to prompt the user'`
+`@wait-for-keypress 'Message to prompt the user'`
 
 (convenience method) Wait for the user to press a key to continue execution of the script.
 
@@ -177,7 +186,7 @@ Example:
 
 ```bash
 #!/usr/bin/env badash
-@wait_for_keypress 'Press a key to continue...'
+@wait-for-keypress 'Press a key to continue...'
 ```
 
 <details>
@@ -190,14 +199,108 @@ read -n1 -s
 ```
 </details>
 
-### system_is_*
 
-TODO
+# Tests and Checks
+
+## @system-is-*
+
+`@system-is-<uname-string>`
+
+(test) Test the uname string of the current system. This is case insensitive, so `@system-is-darwin` == `@system-is-Darwin`.
+
+Example:
+
+```bash
+#!/usr/bin/env badash
+if @system-is-darwin
+then
+  echo "we're on Mac!"
+elif @system-is-linux
+then
+  echo "we're on Linux!"
+else
+  echo "unknown system!!"
+fi
+```
+
+<details>
+  <summary>What that compiles to</summary>
+
+```bash
+#!/usr/bin/env bash
+if [ "$(uname -s | tr '[:upper:]' '[:lower:]')" == "darwin" ]
+then
+  echo "we're on Mac!"
+elif [ "$(uname -s | tr '[:upper:]' '[:lower:]')" == "linux" ]
+then
+  echo "we're on Linux!"
+else
+  echo "unknown system!!"
+fi
+```
+</details>
 
 
-## Development
+## @uses-cmds
 
-### Tests
+`@uses-cmds [system/]command [[system/]command] ... `
+
+(check) Check that commands exist before using them. Can be comma or space delimited, and you can specify a certain system to check.
+
+Example:
+
+```bash
+#!/usr/bin/env badash
+@uses-cmds git jq Linux/date Darwin/gdate
+
+git status
+echo '{"some":"JSON"}' | jq '.'
+
+# show the current date
+if [ "$(uname -s)" == "Darwin" ]
+then
+  gdate
+else
+  date
+fi
+```
+
+<details>
+  <summary>What that compiles to</summary>
+
+```bash
+#!/usr/bin/env bash
+gen::req-check() {
+  if [ ! $(command -v $2) ]; then
+    echo "test-compile: Required command '$2' not found" >&2
+    printf -v "$1" "1"
+  fi
+}
+_gen_cmd_check_rtn=0
+[ "$(uname -s)" == 'Darwin' ] && gen::req-check _gen_cmd_check_rtn gdate
+[ "$(uname -s)" == 'Linux' ] && gen::req-check _gen_cmd_check_rtn date
+gen::req-check _gen_cmd_check_rtn git
+gen::req-check _gen_cmd_check_rtn jq
+if [ "$_gen_cmd_check_rtn" != 0 ]; then exit $_gen_cmd_check_rtn; fi
+
+git status
+echo '{"some":"JSON"}' | jq '.'
+
+# show the current date
+if [ "$(uname -s)" == "Darwin" ]
+then
+  gdate
+else
+  date
+fi
+```
+</details>
+
+
+
+# Development
+
+## Tests
 
 To run the tests, install [bats-core](https://github.com/bats-core/bats-core), and run this command from the top-level project directory:
 

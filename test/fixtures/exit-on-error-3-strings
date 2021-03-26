@@ -1,6 +1,6 @@
 #!/usr/bin/env badash
 
 echo "three strings"
-@exit_on_error "one" 'two' 'three'
+@exit-on-error "one" 'two' 'three'
 
 echo "should fail to compile"

@@ -2,14 +2,17 @@
 
 # TODO: what things should I set here, like pipefail and lastpipe and so forth?
 
-REQ_CHECK_FUNC_NAME="gen::req_check"
+REQ_CHECK_FUNC_NAME="gen::req-check"
 WAIT_COMMAND_FUNC_NAME="gen::wait-for-command"
 
+# colors
+COLOR_RESET='\033[0m'
+COLOR_FG_YELLOW='\033[0;33m'
 
 ########## FUNCTIONS ##########
 
 # generate code to exit with a message if there is an error
-gen_exit_on_error() {
+gen-exit-on-error() {
   # arguments:
   local varname="$1" # write the generated code to this variable
   local padding="$2" # generate the code to match the padding of the surrounding code
@@ -18,7 +21,7 @@ gen_exit_on_error() {
   if [ -z "$exit_info" ]
   then
     echo "" >&2
-    echo "badash: Wrong number of arguments to @exit_on_error: expected 1 or 2, got 0" >&2
+    echo "badash: Wrong number of arguments to @exit-on-error: expected 1 or 2, got 0" >&2
     exit 1
   fi
 
@@ -39,7 +42,7 @@ gen_exit_on_error() {
     run_code="${exit_options[1]}"
   else
     echo "" >&2
-    echo "badash: Wrong number of arguments to @exit_on_error: expected 1 or 2, got $num_exit_strings" >&2
+    echo "badash: Wrong number of arguments to @exit-on-error: expected 1 or 2, got $num_exit_strings" >&2
     exit 1
   fi
 
@@ -60,7 +63,7 @@ END_GEN_CODE
 }
 
 # generate code to wait for a keypress
-gen_wait_for_keypress() {
+gen-wait-for-keypress() {
   # arguments:
   local varname="$1" # write the generated code to this variable
   local padding="$2" # generate the code to match the padding of the surrounding code
@@ -80,7 +83,7 @@ END_GEN_CODE
 }
 
 # add a command to the list of requirements
-add_cmd_requirements() {
+add-cmd-requirements() {
   local cmd_names_string="$1"
   local calling_script="$2"
 
@@ -94,11 +97,11 @@ add_cmd_requirements() {
   done
 
   # make sure the function that checks requirements is part of imports
-  import_function_lazy "$REQ_CHECK_FUNC_NAME" 'gen_requirement_check' "$calling_script"
+  import-function-lazy "$REQ_CHECK_FUNC_NAME" 'gen-requirement-check' "$calling_script"
 }
 
 # generate function to check for required commands in the script
-gen_requirement_check() {
+gen-requirement-check() {
   local retvar="$1" # write the function text to this variable
   local script_name="$2"
 
@@ -118,7 +121,7 @@ END_OF_REQ_CHECK
 }
 
 # import a function if it has not already been imported
-import_function_lazy() {
+import-function-lazy() {
   # arguments:
   local func_name="$1"
   local gen_func_name="$2" # command to run to import the function
@@ -264,10 +267,10 @@ do
     # remove the shebang line
     continue
 
-  # generate code for @system_is_darwin?, @system_is_linux?, etc.
-  # (which is case-insensitive, so @system_is_Darwin? == @system_is_DARWIN? == @system_is_darwin?)
+  # DEPRECATED
   elif [[ "$line" =~ @system_is_(.*)\? ]]
   then
+    echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@system_is_*' is now '@system-is-*' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
     system="${BASH_REMATCH[1]}"
     system_lowercase="$(echo "$system" | tr '[:upper:]' '[:lower:]')"
     # for example:
@@ -275,25 +278,63 @@ do
     replaced_test="${line/@system_is_$system?/[ \"\$(uname -s | tr '[:upper:]' '[:lower:]')\" == \"$system_lowercase\" ]}"
     generated_body+=( "$replaced_test" )
 
-  # exit with an error message if the previous command failed
+  # generate code for @system-is-darwin?, @system-is-linux?, etc.
+  # (which is case-insensitive, so @system-is-Darwin? == @system-is-DARWIN? == @system-is-darwin?)
+  elif [[ "$line" =~ @system-is-(.*)\? ]]
+  then
+    system="${BASH_REMATCH[1]}"
+    system_lowercase="$(echo "$system" | tr '[:upper:]' '[:lower:]')"
+    # for example:
+    # @system-is-Darwin?  -->  [ "$(uname -s | tr [:upper:] [:lower:])" == "darwin" ]
+    replaced_test="${line/@system-is-$system?/[ \"\$(uname -s | tr '[:upper:]' '[:lower:]')\" == \"$system_lowercase\" ]}"
+    generated_body+=( "$replaced_test" )
+
+  # DEPRECATED
   elif [[ "$line" =~ ^(\ *)@exit_on_error\ *(.*)$ ]]
+  then
+    echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@exit_on_error' is now '@exit-on-error' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
+    padding="${BASH_REMATCH[1]}"
+    exit_info_strings="${BASH_REMATCH[2]}"
+    gen-exit-on-error gen_exit "$padding" "$exit_info_strings"
+    generated_body+=( "$gen_exit" )
+
+  # exit with an error message if the previous command failed
+  elif [[ "$line" =~ ^(\ *)@exit-on-error\ *(.*)$ ]]
   then
     padding="${BASH_REMATCH[1]}"
     exit_info_strings="${BASH_REMATCH[2]}"
-    gen_exit_on_error gen_exit "$padding" "$exit_info_strings"
+    gen-exit-on-error gen_exit "$padding" "$exit_info_strings"
     generated_body+=( "$gen_exit" )
 
+  # DEPRECATED
   elif [[ "$line" =~ ^(\ *)@wait_for_keypress\ (.*)$ ]]
   then
+    echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@wait_for_keypress' is now '@wait-for-keypress' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
     padding="${BASH_REMATCH[1]}"
     prompt_str="${BASH_REMATCH[2]}"
     gen_wait_for_keypress gen_keypress "$padding" "$prompt_str"
     generated_body+=( "$gen_keypress" )
 
+  # wait for the user to press a key
+  elif [[ "$line" =~ ^(\ *)@wait-for-keypress\ (.*)$ ]]
+  then
+    padding="${BASH_REMATCH[1]}"
+    prompt_str="${BASH_REMATCH[2]}"
+    gen-wait-for-keypress gen_keypress "$padding" "$prompt_str"
+    generated_body+=( "$gen_keypress" )
+
+  # DEPRECATED
   elif [[ "$line" =~ ^@uses_cmds\ (.*)$ ]]
   then
+    echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@uses_cmds' is now '@uses-cmds' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
     cmd_names="${BASH_REMATCH[1]}"
-    add_cmd_requirements "$cmd_names" "$bare_script_name"
+    add-cmd-requirements "$cmd_names" "$bare_script_name"
+
+  # check that commands exist before using them
+  elif [[ "$line" =~ ^@uses-cmds\ (.*)$ ]]
+  then
+    cmd_names="${BASH_REMATCH[1]}"
+    add-cmd-requirements "$cmd_names" "$bare_script_name"
 
   # display a spinner while waiting for a command to finish
   elif [[ "$line" =~ @wait-for-command ]]
@@ -301,7 +342,7 @@ do
     replaced_directive="${line//@wait-for-command/$WAIT_COMMAND_FUNC_NAME}"
     generated_body+=( "$replaced_directive" )
     # make sure the function that does that is part of imports
-    import_function_lazy "$WAIT_COMMAND_FUNC_NAME" 'gen-wait-command-function'
+    import-function-lazy "$WAIT_COMMAND_FUNC_NAME" 'gen-wait-command-function'
 
   # TODO: @confirm_y/n
   # but, how to do default for that (specify default yes or no)
@@ -333,11 +374,10 @@ do
 done
 
 # generate the requirement check code
-generated_reqs=()
+cmd_reqs=()
 if [ "${#cmd_requirements[@]}" -gt 0 ]
 then
   # add the checks for command requirements
-  generated_reqs+=( '_gen_cmd_check_rtn=0' )
   for cmd_name in "${!cmd_requirements[@]}"
   do
     # platform-specific commands
@@ -346,12 +386,17 @@ then
       os_for_cmd="${BASH_REMATCH[1]}"
       actual_command="${BASH_REMATCH[2]}"
       # check the OS first before checking the cmd
-      generated_reqs+=( "[ \"\$(uname -s)\" == '$os_for_cmd' ] && $REQ_CHECK_FUNC_NAME _gen_cmd_check_rtn $actual_command" )
+      cmd_reqs+=( "[ \"\$(uname -s)\" == '$os_for_cmd' ] && $REQ_CHECK_FUNC_NAME _gen_cmd_check_rtn $actual_command" )
     else
-      generated_reqs+=( "$REQ_CHECK_FUNC_NAME _gen_cmd_check_rtn $cmd_name" )
+      cmd_reqs+=( "$REQ_CHECK_FUNC_NAME _gen_cmd_check_rtn $cmd_name" )
     fi
   done
-  generated_reqs+=( 'if [ "$_gen_cmd_check_rtn" != 0 ]; then exit $_gen_cmd_check_rtn; fi' )
+  # sort those so they are predictable for testing
+  # (from https://stackoverflow.com/a/11789688)
+  IFS=$'\n' sorted_reqs=($(sort <<<"${cmd_reqs[*]}"))
+  unset IFS
+
+  generated_reqs=( '_gen_cmd_check_rtn=0' "${sorted_reqs[@]}" 'if [ "$_gen_cmd_check_rtn" != 0 ]; then exit $_gen_cmd_check_rtn; fi' )
 fi
 
 

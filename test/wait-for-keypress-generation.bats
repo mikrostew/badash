@@ -11,8 +11,8 @@ teardown() {
 }
 
 
-# generate code for "@wait_for_keypress"
-@test "@wait_for_keypress" {
+# generate code for "@wait-for-keypress"
+@test "@wait-for-keypress" {
   bash_script="test/fixtures/wait-for-keypress"
   generated_file="$tmpdir/.badash/wait-for-keypress"
 
