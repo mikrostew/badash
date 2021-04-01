@@ -217,6 +217,8 @@ $WAIT_COMMAND_FUNC_NAME() {
     # if it fails, show the command output
     echo "\$cmd_output"
   fi
+  # pass through the exit code of the internal command, instead of dropping it
+  return "\$exit_code"
 }
 END_OF_WAIT_FUNCTION
   # write the function text to the variable (instead of echo)
@@ -363,6 +365,8 @@ do
   # TODO: some way to create help text for -h/--help
 
   # TODO: things like @@SCRIPT_NAME@@, @@DIR_NAME@@, etc, so the script can use those
+
+  # TODO: colors
 
   else
     # no imports or anything to do, just add to the body

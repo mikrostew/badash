@@ -91,7 +91,7 @@ fi
 
 `@wait-for-command [options] command to run`
 
-(convenience method) Wait for a long-running command to finish, displaying a spinner while it runs. Show the output only on error.
+(convenience method) Wait for a long-running command to finish, displaying a spinner while it runs. Show the output only on error, passing the exit code through.
 
 **Options**
 

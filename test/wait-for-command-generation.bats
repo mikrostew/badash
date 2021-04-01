@@ -94,6 +94,8 @@ gen::wait-for-command() {
     # if it fails, show the command output
     echo "$cmd_output"
   fi
+  # pass through the exit code of the internal command, instead of dropping it
+  return "$exit_code"
 }
 echo "testing wait-for-command"
 gen::wait-for-command echo "this will not be printed"
@@ -201,6 +203,8 @@ gen::wait-for-command() {
     # if it fails, show the command output
     echo "$cmd_output"
   fi
+  # pass through the exit code of the internal command, instead of dropping it
+  return "$exit_code"
 }
 echo "testing wait-for-command"
 gen::wait-for-command echo "this will not be printed"
@@ -309,6 +313,8 @@ gen::wait-for-command() {
     # if it fails, show the command output
     echo "$cmd_output"
   fi
+  # pass through the exit code of the internal command, instead of dropping it
+  return "$exit_code"
 }
 echo "testing wait-for-command"
 # this should always fail
@@ -317,8 +323,8 @@ END_FILE_CONTENTS
   )"
 
   run ./badash "$bash_script"
-  # don't test this, since I am expecting it to fail
-  #[ "$status" -eq 0 ]
+  # should fail with the exit code of the command
+  [ "$status" -eq 2 ]
 
   # convert CR to newline
   # remove all non-printable stuff except newline
@@ -419,6 +425,8 @@ gen::wait-for-command() {
     # if it fails, show the command output
     echo "$cmd_output"
   fi
+  # pass through the exit code of the internal command, instead of dropping it
+  return "$exit_code"
 }
 echo "testing wait-for-command"
 gen::wait-for-command echo "first command" && gen::wait-for-command echo "second command"
@@ -526,6 +534,8 @@ gen::wait-for-command() {
     # if it fails, show the command output
     echo "$cmd_output"
   fi
+  # pass through the exit code of the internal command, instead of dropping it
+  return "$exit_code"
 }
 echo "testing wait-for-command --show-output"
 gen::wait-for-command --show-output echo "this WILL be printed"

@@ -4,4 +4,4 @@
 echo "stdout text"
 echo "stderr text" >&2
 
-exit 1
+exit 2
