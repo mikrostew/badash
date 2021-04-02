@@ -159,19 +159,35 @@ if [ "\$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
 # and only show output if there is an error
 $WAIT_COMMAND_FUNC_NAME() {
   # flags
-  #  --show-output: always show command output
-  if [ "\$1" == "--show-output" ]
+  #  --show-output (bool): always show command output
+  #  --hide-args (bool): show command name, but hide arguments (for secrets and such)
+  local more_args=0
+  while [ "\$more_args" == 0 ]
+  do
+    if [ "\$1" == "--show-output" ]
+    then
+      local show_output="true"
+      shift
+    elif [ "\$1" == "--hide-args" ]
+    then
+      local hide_args="true"
+      shift
+    else
+      more_args=1
+    fi
+  done
+  # rest of the input is the command and arguments
+  if [ "\$hide_args" == "true" ]
   then
-    local show_output="true"
-    shift
+    local cmd_display="\$1 [args hidden]"
+  else
+    local cmd_display="\$@"
   fi
-  # rest of the input is a command array
-  local cmd_string="\$@"
 
   # calculate things for the output
   local spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
   local num_chars=\${#spin_chars}
-  local total_length=\$(( 2 + \${#cmd_string} ))
+  local total_length=\$(( 2 + \${#cmd_display} ))
 
   # capture when the command was started
   local cmd_start_time=\$(\$DATE_CMD +%s%3N)
@@ -183,7 +199,7 @@ $WAIT_COMMAND_FUNC_NAME() {
     while :
     do
       i=\$(( (i + 1) % num_chars ))
-      printf "\\\\r\${spin_chars:\$i:1} \${COLOR_FG_BOLD_GREEN}running\${COLOR_RESET} '\${cmd_string}'" >&2
+      printf "\\\\r\${spin_chars:\$i:1} \${COLOR_FG_BOLD_GREEN}running\${COLOR_RESET} '\${cmd_display}'" >&2
       sleep 0.1
     done
   ) & disown
@@ -204,7 +220,7 @@ $WAIT_COMMAND_FUNC_NAME() {
   # but still check if it failed?
   #printf "\\\\r%-\${total_length}s\\\\r" ' ' >&2
 
-  printf "\\\\r  \${COLOR_FG_BOLD_GREEN}ran\${COLOR_RESET} '\$cmd_string' (\${cmd_run_time}ms)" >&2
+  printf "\\\\r  \${COLOR_FG_BOLD_GREEN}ran\${COLOR_RESET} '\$cmd_display' (\${cmd_run_time}ms)" >&2
 
   # check that the command was successful
   if [ "\$exit_code" == 0 ]

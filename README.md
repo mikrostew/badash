@@ -97,6 +97,8 @@ fi
 
 `--show-output` By default, command output is hidden unless it returns an error code. This option will also show the command output if the command is successful.
 
+`--hide-args` By default, the command and all arguments are shown in the spinner text. This option hides the arguments, and replaces them with `[args hidden]`.
+
 Example:
 
 ```bash

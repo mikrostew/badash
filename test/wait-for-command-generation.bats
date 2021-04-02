@@ -22,19 +22,35 @@ if [ "$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
 # and only show output if there is an error
 gen::wait-for-command() {
   # flags
-  #  --show-output: always show command output
-  if [ "$1" == "--show-output" ]
+  #  --show-output (bool): always show command output
+  #  --hide-args (bool): show command name, but hide arguments (for secrets and such)
+  local more_args=0
+  while [ "$more_args" == 0 ]
+  do
+    if [ "$1" == "--show-output" ]
+    then
+      local show_output="true"
+      shift
+    elif [ "$1" == "--hide-args" ]
+    then
+      local hide_args="true"
+      shift
+    else
+      more_args=1
+    fi
+  done
+  # rest of the input is the command and arguments
+  if [ "$hide_args" == "true" ]
   then
-    local show_output="true"
-    shift
+    local cmd_display="$1 [args hidden]"
+  else
+    local cmd_display="$@"
   fi
-  # rest of the input is a command array
-  local cmd_string="$@"
 
   # calculate things for the output
   local spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
   local num_chars=${#spin_chars}
-  local total_length=$(( 2 + ${#cmd_string} ))
+  local total_length=$(( 2 + ${#cmd_display} ))
 
   # capture when the command was started
   local cmd_start_time=$($DATE_CMD +%s%3N)
@@ -46,7 +62,7 @@ gen::wait-for-command() {
     while :
     do
       i=$(( (i + 1) % num_chars ))
-      printf "\r${spin_chars:$i:1} ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '${cmd_string}'" >&2
+      printf "\r${spin_chars:$i:1} ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '${cmd_display}'" >&2
       sleep 0.1
     done
   ) & disown
@@ -67,7 +83,7 @@ gen::wait-for-command() {
   # but still check if it failed?
   #printf "\r%-${total_length}s\r" ' ' >&2
 
-  printf "\r  ${COLOR_FG_BOLD_GREEN}ran${COLOR_RESET} '$cmd_string' (${cmd_run_time}ms)" >&2
+  printf "\r  ${COLOR_FG_BOLD_GREEN}ran${COLOR_RESET} '$cmd_display' (${cmd_run_time}ms)" >&2
 
   # check that the command was successful
   if [ "$exit_code" == 0 ]
@@ -262,6 +278,71 @@ END_OF_OUTPUT
 $FILE_BOILERPLATE
 echo "testing wait-for-command --show-output"
 gen::wait-for-command --show-output echo "this WILL be printed"
+END_FILE_CONTENTS
+  )"
+
+  run ./badash "$bash_script"
+  [ "$status" -eq 0 ]
+
+  # have to clean this up
+  cleaned_output="$(clean_output "$output")"
+
+  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff "$generated_file" <(echo "$expected_file_contents")
+}
+
+# hide arguments with --hide-args flag
+@test "@wait-for-command --hide-args" {
+  bash_script="test/fixtures/wait-for-command-hide"
+  generated_file="$tmpdir/.badash/wait-for-command-hide"
+
+  # the output has some timing info that varies - will fix that in the output
+  expected_output="$(cat <<'END_OF_OUTPUT'
+testing wait-for-command --hide-args
+
+   running  'echo [args hidden]'
+   ran  'echo [args hidden]' (113ms) [ OK ]
+END_OF_OUTPUT
+  )"
+
+  # expected generated file
+  expected_file_contents="$(cat <<END_FILE_CONTENTS
+$FILE_BOILERPLATE
+echo "testing wait-for-command --hide-args"
+gen::wait-for-command --hide-args echo "this WILL be printed"
+END_FILE_CONTENTS
+  )"
+
+  run ./badash "$bash_script"
+  [ "$status" -eq 0 ]
+
+  # have to clean this up
+  cleaned_output="$(clean_output "$output")"
+
+  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff "$generated_file" <(echo "$expected_file_contents")
+}
+
+# hide arguments and show output
+@test "@wait-for-command --hide-args --show-output" {
+  bash_script="test/fixtures/wait-for-command-hide-show"
+  generated_file="$tmpdir/.badash/wait-for-command-hide-show"
+
+  # the output has some timing info that varies - will fix that in the output
+  expected_output="$(cat <<'END_OF_OUTPUT'
+testing wait-for-command --hide-args --show-output
+
+   running  'echo [args hidden]'
+   ran  'echo [args hidden]' (113ms) [ OK ]
+this WILL be printed
+END_OF_OUTPUT
+  )"
+
+  # expected generated file
+  expected_file_contents="$(cat <<END_FILE_CONTENTS
+$FILE_BOILERPLATE
+echo "testing wait-for-command --hide-args --show-output"
+gen::wait-for-command --hide-args --show-output echo "this WILL be printed"
 END_FILE_CONTENTS
   )"
 
