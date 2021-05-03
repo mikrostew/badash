@@ -68,11 +68,15 @@ gen::wait-for-command() {
   ) & disown
   local spinner_pid="$!"
 
+  # trap signals and kill the spinner process
+  trap "kill $spinner_pid" INT TERM
+
   # run the command, capturing its output (both stdout and stderr)
   cmd_output="$("$@" 2>&1)"
   local exit_code="$?"
 
-  # kill the spinner process
+  # clear the trap, and kill the spinner process
+  trap - INT TERM
   kill "$spinner_pid"
 
   # calculate total runtime (approx)
