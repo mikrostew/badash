@@ -296,15 +296,15 @@ do
     continue
 
   # DEPRECATED
-  elif [[ "$line" =~ @system_is_(.*)\? ]]
-  then
-    echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@system_is_*' is now '@system-is-*' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
-    system="${BASH_REMATCH[1]}"
-    system_lowercase="$(echo "$system" | tr '[:upper:]' '[:lower:]')"
-    # for example:
-    # @system_is_Darwin?  -->  [ "$(uname -s | tr [:upper:] [:lower:])" == "darwin" ]
-    replaced_test="${line/@system_is_$system?/[ \"\$(uname -s | tr '[:upper:]' '[:lower:]')\" == \"$system_lowercase\" ]}"
-    generated_body+=( "$replaced_test" )
+  # elif [[ "$line" =~ @system_is_(.*)\? ]]
+  # then
+  #   echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@system_is_*' is now '@system-is-*' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
+  #   system="${BASH_REMATCH[1]}"
+  #   system_lowercase="$(echo "$system" | tr '[:upper:]' '[:lower:]')"
+  #   # for example:
+  #   # @system_is_Darwin?  -->  [ "$(uname -s | tr [:upper:] [:lower:])" == "darwin" ]
+  #   replaced_test="${line/@system_is_$system?/[ \"\$(uname -s | tr '[:upper:]' '[:lower:]')\" == \"$system_lowercase\" ]}"
+  #   generated_body+=( "$replaced_test" )
 
   # generate code for @system-is-darwin?, @system-is-linux?, etc.
   # (which is case-insensitive, so @system-is-Darwin? == @system-is-DARWIN? == @system-is-darwin?)
@@ -318,13 +318,13 @@ do
     generated_body+=( "$replaced_test" )
 
   # DEPRECATED
-  elif [[ "$line" =~ ^(\ *)@exit_on_error\ *(.*)$ ]]
-  then
-    echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@exit_on_error' is now '@exit-on-error' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
-    padding="${BASH_REMATCH[1]}"
-    exit_info_strings="${BASH_REMATCH[2]}"
-    gen-exit-on-error gen_exit "$padding" "$exit_info_strings"
-    generated_body+=( "$gen_exit" )
+  # elif [[ "$line" =~ ^(\ *)@exit_on_error\ *(.*)$ ]]
+  # then
+  #   echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@exit_on_error' is now '@exit-on-error' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
+  #   padding="${BASH_REMATCH[1]}"
+  #   exit_info_strings="${BASH_REMATCH[2]}"
+  #   gen-exit-on-error gen_exit "$padding" "$exit_info_strings"
+  #   generated_body+=( "$gen_exit" )
 
   # exit with an error message if the previous command failed
   elif [[ "$line" =~ ^(\ *)@exit-on-error\ *(.*)$ ]]
@@ -335,13 +335,13 @@ do
     generated_body+=( "$gen_exit" )
 
   # DEPRECATED
-  elif [[ "$line" =~ ^(\ *)@wait_for_keypress\ (.*)$ ]]
-  then
-    echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@wait_for_keypress' is now '@wait-for-keypress' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
-    padding="${BASH_REMATCH[1]}"
-    prompt_str="${BASH_REMATCH[2]}"
-    gen_wait_for_keypress gen_keypress "$padding" "$prompt_str"
-    generated_body+=( "$gen_keypress" )
+  # elif [[ "$line" =~ ^(\ *)@wait_for_keypress\ (.*)$ ]]
+  # then
+  #   echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@wait_for_keypress' is now '@wait-for-keypress' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
+  #   padding="${BASH_REMATCH[1]}"
+  #   prompt_str="${BASH_REMATCH[2]}"
+  #   gen_wait_for_keypress gen_keypress "$padding" "$prompt_str"
+  #   generated_body+=( "$gen_keypress" )
 
   # wait for the user to press a key
   elif [[ "$line" =~ ^(\ *)@wait-for-keypress\ (.*)$ ]]
@@ -352,11 +352,11 @@ do
     generated_body+=( "$gen_keypress" )
 
   # DEPRECATED
-  elif [[ "$line" =~ ^@uses_cmds\ (.*)$ ]]
-  then
-    echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@uses_cmds' is now '@uses-cmds' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
-    cmd_names="${BASH_REMATCH[1]}"
-    add-cmd-requirements "$cmd_names" "$bare_script_name"
+  # elif [[ "$line" =~ ^@uses_cmds\ (.*)$ ]]
+  # then
+  #   echo -e "${COLOR_FG_YELLOW}DEPRECATION [line $current_line_num]: '@uses_cmds' is now '@uses-cmds' (because hyphens are nicer) - please use that${COLOR_RESET}" >&2
+  #   cmd_names="${BASH_REMATCH[1]}"
+  #   add-cmd-requirements "$cmd_names" "$bare_script_name"
 
   # check that commands exist before using them
   elif [[ "$line" =~ ^@uses-cmds\ (.*)$ ]]
