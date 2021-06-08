@@ -31,7 +31,7 @@ ln -s /usr/local/lib/badash/badash /usr/local/bin/badash
 
 `@exit-on-error "message if this fails" ['code to run before exit']`
 
-(convenience method) Check the exit code of the command that just completed, and exit with an error message if it failed. Optionally run some code before exiting.
+Check the exit code of the command that just completed, and exit with an error message if it failed. Optionally run some code before exiting.
 
 Example:
 
@@ -91,7 +91,7 @@ fi
 
 `@wait-for-command [options] command to run`
 
-(convenience method) Wait for a long-running command to finish, displaying a spinner while it runs. Show the output only on error, passing the exit code through.
+Wait for a long-running command to finish, displaying a spinner while it runs. Show the output only on error, passing the exit code through.
 
 **Options**
 
@@ -188,7 +188,7 @@ gen::wait-for-command brew update
 
 `@wait-for-keypress 'Message to prompt the user'`
 
-(convenience method) Wait for the user to press a key to continue execution of the script.
+Wait for the user to press a key to continue execution of the script.
 
 Example:
 
@@ -214,7 +214,7 @@ read -n1 -s
 
 `@system-is-<uname-string>`
 
-(test) Test the uname string of the current system. This is case insensitive, so `@system-is-darwin` == `@system-is-Darwin`.
+Test the uname string of the current system. This is case insensitive, so `@system-is-darwin` == `@system-is-Darwin`.
 
 Example:
 
@@ -253,7 +253,7 @@ fi
 
 `@uses-cmds [system/]command [[system/]command] ... `
 
-(check) Check that commands exist before using them. Can be comma or space delimited, and you can specify a certain system to check.
+Check that commands exist before using them. Can be comma or space delimited, and you can specify a certain system to check.
 
 Example:
 
