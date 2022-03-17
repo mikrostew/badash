@@ -14,7 +14,6 @@ teardown() {
 FILE_BOILERPLATE="$(cat <<'END_FILE_BOILERPLATE'
 #!/usr/bin/env bash
 COLOR_FG_BOLD_GREEN='\033[1;32m'
-COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 if [ "$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
@@ -62,7 +61,7 @@ gen::wait-for-command() {
     while :
     do
       i=$(( (i + 1) % num_chars ))
-      printf "\r${spin_chars:$i:1} ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '${cmd_display}'" >&2
+      printf "\r ${spin_chars:$i:1} ${cmd_display}" >&2
       sleep 0.1
     done
   ) & disown
@@ -87,18 +86,16 @@ gen::wait-for-command() {
   # but still check if it failed?
   #printf "\r%-${total_length}s\r" ' ' >&2
 
-  printf "\r  ${COLOR_FG_BOLD_GREEN}ran${COLOR_RESET} '$cmd_display' (${cmd_run_time}ms)" >&2
-
   # check that the command was successful
   if [ "$exit_code" == 0 ]
   then
-    printf " [${COLOR_FG_GREEN}OK${COLOR_RESET}]\n"
+    printf "\r ${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} $cmd_display (${cmd_run_time}ms)\n" >&2
     # show output if configured
     if [ "$show_output" == "true" ]; then echo "$cmd_output"; fi
   else
-    printf " [${COLOR_FG_RED}ERROR${COLOR_RESET}]\n"
-    # if it fails, show the command output
-    echo "$cmd_output"
+    printf "\r ${COLOR_FG_RED}✖${COLOR_RESET} $cmd_display (${cmd_run_time}ms)\n" >&2
+    # if it fails, show the command output (in red)
+    echo -e "${COLOR_FG_RED}$cmd_output${COLOR_RESET}" >&2
   fi
   # pass through the exit code of the internal command, instead of dropping it
   return "$exit_code"
@@ -107,15 +104,15 @@ END_FILE_BOILERPLATE
 )"
 
 # clean up the output for validation
-# * convert CR to newline
-# * remove all non-printable stuff except newline
-# * clean up the ANSI color stuff
-# * remove the spinner character
-# * replace the output time to match expected
+# * convert CR character to newline + 'CR'
+# * remove all non-printable stuff, except newline
+# * replace the ANSI color stuff (red/green/reset)
+# * replace the spinner character
+# * replace the output time to be deterministic
 #
 # note that `tr` is using octal here
 clean_output() {
-  LC_ALL=C echo "$1" | tr '\15' '\12' | tr '\0-\11\13-\37' '[ *]' | sed 's/\[[0-9;]*m//g' | sed 's/[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]/ /g' | sed 's/[0-9]*ms/113ms/'
+  LC_ALL=C echo "$1" | tr '\15' '\12CR' | tr -d '\0-\11\13-\37' | sed 's/\[1;32m/GREEN/g' | sed 's/\[0;31m/RED/g' | sed 's/\[0m/RESET/g' | sed 's/[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]/SPIN/g' | sed 's/[0-9]*ms/113ms/'
 }
 
 
@@ -130,8 +127,8 @@ clean_output() {
   expected_output="$(cat <<'END_OF_OUTPUT'
 testing wait-for-command
 
-   running  'echo this will not be printed'
-   ran  'echo this will not be printed' (113ms) [ OK ]
+ SPIN echo this will not be printed
+ GREEN✔RESET echo this will not be printed (113ms)
 END_OF_OUTPUT
   )"
 
@@ -162,11 +159,11 @@ END_FILE_CONTENTS
   expected_output="$(cat <<'END_OF_OUTPUT'
 testing wait-for-command
 
-   running  'echo this will not be printed'
-   ran  'echo this will not be printed' (113ms) [ OK ]
+ SPIN echo this will not be printed
+ GREEN✔RESET echo this will not be printed (113ms)
 
-   running  'echo or this'
-   ran  'echo or this' (113ms) [ OK ]
+ SPIN echo or this
+ GREEN✔RESET echo or this (113ms)
 END_OF_OUTPUT
   )"
 
@@ -199,10 +196,10 @@ END_FILE_CONTENTS
   expected_output="$(cat <<'END_OF_OUTPUT'
 testing wait-for-command
 
-   running  './test/fixtures/fail-with-output.sh'
-   ran  './test/fixtures/fail-with-output.sh' (113ms) [ ERROR ]
-stdout text
-stderr text
+ SPIN ./test/fixtures/fail-with-output.sh
+ RED✖RESET ./test/fixtures/fail-with-output.sh (113ms)
+REDstdout text
+stderr textRESET
 END_OF_OUTPUT
   )"
 
@@ -236,11 +233,11 @@ END_FILE_CONTENTS
   expected_output="$(cat <<'END_OF_OUTPUT'
 testing wait-for-command
 
-   running  'echo first command'
-   ran  'echo first command' (113ms) [ OK ]
+ SPIN echo first command
+ GREEN✔RESET echo first command (113ms)
 
-   running  'echo second command'
-   ran  'echo second command' (113ms) [ OK ]
+ SPIN echo second command
+ GREEN✔RESET echo second command (113ms)
 END_OF_OUTPUT
   )"
 
@@ -271,8 +268,8 @@ END_FILE_CONTENTS
   expected_output="$(cat <<'END_OF_OUTPUT'
 testing wait-for-command --show-output
 
-   running  'echo this WILL be printed'
-   ran  'echo this WILL be printed' (113ms) [ OK ]
+ SPIN echo this WILL be printed
+ GREEN✔RESET echo this WILL be printed (113ms)
 this WILL be printed
 END_OF_OUTPUT
   )"
@@ -304,8 +301,8 @@ END_FILE_CONTENTS
   expected_output="$(cat <<'END_OF_OUTPUT'
 testing wait-for-command --hide-args
 
-   running  'echo [args hidden]'
-   ran  'echo [args hidden]' (113ms) [ OK ]
+ SPIN echo [args hidden]
+ GREEN✔RESET echo [args hidden] (113ms)
 END_OF_OUTPUT
   )"
 
@@ -336,8 +333,8 @@ END_FILE_CONTENTS
   expected_output="$(cat <<'END_OF_OUTPUT'
 testing wait-for-command --hide-args --show-output
 
-   running  'echo [args hidden]'
-   ran  'echo [args hidden]' (113ms) [ OK ]
+ SPIN echo [args hidden]
+ GREEN✔RESET echo [args hidden] (113ms)
 this WILL be printed
 END_OF_OUTPUT
   )"
@@ -367,11 +364,11 @@ END_FILE_CONTENTS
   bash_script="test/fixtures/wait-for-command-ctrl-c"
   generated_file="$tmpdir/.badash/wait-for-command-ctrl-c"
 
-  # TODO: if I kill the process, no output is saved
+  # TODO: if I kill the process, no output is saved (have to use a trap?)
   expected_output="$(cat <<'END_OF_OUTPUT'
 testing wait-for-command with Ctrl-C
 
-   running  'sleep 3'
+  sleep 3
 END_OF_OUTPUT
   )"
 
