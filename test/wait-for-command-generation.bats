@@ -17,7 +17,12 @@ COLOR_FG_BOLD_GREEN='\033[1;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 if [ "$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
-COLUMNS="$(tput cols)"
+if [ -n "$TERM" ]
+then
+  COLUMNS="$(tput cols)"
+else
+  COLUMNS=80
+fi
 # show a busy spinner while command is running
 # and only show output if there is an error
 gen::wait-for-command() {
