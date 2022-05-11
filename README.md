@@ -112,27 +112,52 @@ Example:
 ```bash
 #!/usr/bin/env bash
 COLOR_FG_BOLD_GREEN='\033[1;32m'
-COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 if [ "$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
+COLUMNS="$(tput cols)"
 # show a busy spinner while command is running
 # and only show output if there is an error
 gen::wait-for-command() {
   # flags
-  #  --show-output: always show command output
-  if [ "$1" == "--show-output" ]
+  #  --show-output (bool): always show command output
+  #  --hide-args (bool): show command name, but hide arguments (for secrets and such)
+  local more_args=0
+  while [ "$more_args" == 0 ]
+  do
+    if [ "$1" == "--show-output" ]
+    then
+      local show_output="true"
+      shift
+    elif [ "$1" == "--hide-args" ]
+    then
+      local hide_args="true"
+      shift
+    else
+      more_args=1
+    fi
+  done
+  # rest of the input is the command and arguments
+  if [ "$hide_args" == "true" ]
   then
-    local show_output="true"
-    shift
+    local cmd_display="$1 [args hidden]"
+  else
+    # make sure cmd is not too wide for the terminal
+    # - 3 chars for spinner, 3 for ellipsis, 12 for time printout (estimated)
+    local max_length=$(( COLUMNS - 18 ))
+    local cmd_args="$*"
+    if [ "${#cmd_args}" -gt "$max_length" ]
+    then
+      local cmd_display="${cmd_args:0:$max_length}..."
+    else
+      local cmd_display="$cmd_args"
+    fi
   fi
-  # rest of the input is a command array
-  local cmd_string="$@"
 
   # calculate things for the output
   local spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
   local num_chars=${#spin_chars}
-  local total_length=$(( 2 + ${#cmd_string} ))
+  #local total_length=$(( 2 + ${#cmd_display} ))
 
   # capture when the command was started
   local cmd_start_time=$($DATE_CMD +%s%3N)
@@ -144,17 +169,21 @@ gen::wait-for-command() {
     while :
     do
       i=$(( (i + 1) % num_chars ))
-      printf "\r${spin_chars:$i:1} ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '${cmd_string}'" >&2
+      printf "\r ${spin_chars:$i:1} ${cmd_display}" >&2
       sleep 0.1
     done
   ) & disown
   local spinner_pid="$!"
 
+  # trap signals and kill the spinner process
+  trap "kill $spinner_pid" INT TERM
+
   # run the command, capturing its output (both stdout and stderr)
   cmd_output="$("$@" 2>&1)"
   local exit_code="$?"
 
-  # kill the spinner process
+  # clear the trap, and kill the spinner process
+  trap - INT TERM
   kill "$spinner_pid"
 
   # calculate total runtime (approx)
@@ -165,19 +194,19 @@ gen::wait-for-command() {
   # but still check if it failed?
   #printf "\r%-${total_length}s\r" ' ' >&2
 
-  printf "\r  ${COLOR_FG_BOLD_GREEN}ran${COLOR_RESET} '$cmd_string' (${cmd_run_time}ms)" >&2
-
   # check that the command was successful
   if [ "$exit_code" == 0 ]
   then
-    printf " [${COLOR_FG_GREEN}OK${COLOR_RESET}]\n"
+    printf "\r ${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} $cmd_display (${cmd_run_time}ms)\n" >&2
     # show output if configured
     if [ "$show_output" == "true" ]; then echo "$cmd_output"; fi
   else
-    printf " [${COLOR_FG_RED}ERROR${COLOR_RESET}]\n"
-    # if it fails, show the command output
-    echo "$cmd_output"
+    printf "\r ${COLOR_FG_RED}✖${COLOR_RESET} $cmd_display (${cmd_run_time}ms)\n" >&2
+    # if it fails, show the command output (in red)
+    echo -e "${COLOR_FG_RED}$cmd_output${COLOR_RESET}" >&2
   fi
+  # pass through the exit code of the internal command, instead of dropping it
+  return "$exit_code"
 }
 gen::wait-for-command brew update
 ```
