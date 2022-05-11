@@ -17,6 +17,13 @@ COLOR_FG_BOLD_GREEN='\033[1;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 if [ "$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
+# https://invisible-island.net/ncurses/terminfo.src.html#toc-_Specials
+if [ -z "$TERM" ] || [ "$TERM" = "dumb" ] || [ "$TERM" = "unknown" ]
+then
+  COLUMNS=80
+else
+  COLUMNS="$(tput cols)"
+fi
 # show a busy spinner while command is running
 # and only show output if there is an error
 gen::wait-for-command() {
@@ -43,13 +50,22 @@ gen::wait-for-command() {
   then
     local cmd_display="$1 [args hidden]"
   else
-    local cmd_display="$@"
+    # make sure cmd is not too wide for the terminal
+    # - 3 chars for spinner, 3 for ellipsis, 12 for time printout (estimated)
+    local max_length=$(( COLUMNS - 18 ))
+    local cmd_args="$*"
+    if [ "${#cmd_args}" -gt "$max_length" ]
+    then
+      local cmd_display="${cmd_args:0:$max_length}..."
+    else
+      local cmd_display="$cmd_args"
+    fi
   fi
 
   # calculate things for the output
   local spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
   local num_chars=${#spin_chars}
-  local total_length=$(( 2 + ${#cmd_display} ))
+  #local total_length=$(( 2 + ${#cmd_display} ))
 
   # capture when the command was started
   local cmd_start_time=$($DATE_CMD +%s%3N)
@@ -398,3 +414,42 @@ END_FILE_CONTENTS
   diff <(echo "$cleaned_output") <(echo "$expected_output")
   diff "$generated_file" <(echo "$expected_file_contents")
 }
+
+# command too long for the line
+@test "@wait-for-command command too long is truncated" {
+  bash_script="test/fixtures/wait-for-command-too-long"
+  generated_file="$tmpdir/.badash/wait-for-command-too-long"
+
+  # the output has some timing info that varies - will fix that in the output
+  # also, the output is different on Linux
+  expected_output="$(cat <<'END_OF_OUTPUT'
+testing wait-for-command too long
+
+ SPIN echo this command is way too long for a single line, there is ...
+ GREEN✔RESET echo this command is way too long for a single line, there is ... (113ms)
+END_OF_OUTPUT
+  )"
+
+  # expected generated file
+  expected_file_contents="$(cat <<END_FILE_CONTENTS
+$FILE_BOILERPLATE
+echo "testing wait-for-command too long"
+gen::wait-for-command echo "this command is way too long for a single line, there is no way this will fit on a single line when I am testing it"
+END_FILE_CONTENTS
+  )"
+
+  # save current term width, modify it, return it after the command
+  # (so this test is not dependent on current term width)
+  read -r rows cols < <(stty size) || true
+  stty cols 80 || true
+  run ./badash "$bash_script"
+  stty cols "$cols" || true
+  [ "$status" -eq 0 ]
+
+  # have to clean this up
+  cleaned_output="$(clean_output "$output")"
+
+  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff "$generated_file" <(echo "$expected_file_contents")
+}
+

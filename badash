@@ -154,6 +154,13 @@ COLOR_FG_BOLD_GREEN='\\\\033[1;32m'
 COLOR_FG_RED='\\\\033[0;31m'
 COLOR_RESET='\\\\033[0m'
 if [ "\$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
+# https://invisible-island.net/ncurses/terminfo.src.html#toc-_Specials
+if [ -z "\$TERM" ] || [ "\$TERM" = "dumb" ] || [ "\$TERM" = "unknown" ]
+then
+  COLUMNS=80
+else
+  COLUMNS="\$(tput cols)"
+fi
 # show a busy spinner while command is running
 # and only show output if there is an error
 $WAIT_COMMAND_FUNC_NAME() {
@@ -180,13 +187,22 @@ $WAIT_COMMAND_FUNC_NAME() {
   then
     local cmd_display="\$1 [args hidden]"
   else
-    local cmd_display="\$@"
+    # make sure cmd is not too wide for the terminal
+    # - 3 chars for spinner, 3 for ellipsis, 12 for time printout (estimated)
+    local max_length=\$(( COLUMNS - 18 ))
+    local cmd_args="\$*"
+    if [ "\${#cmd_args}" -gt "\$max_length" ]
+    then
+      local cmd_display="\${cmd_args:0:\$max_length}..."
+    else
+      local cmd_display="\$cmd_args"
+    fi
   fi
 
   # calculate things for the output
   local spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
   local num_chars=\${#spin_chars}
-  local total_length=\$(( 2 + \${#cmd_display} ))
+  #local total_length=\$(( 2 + \${#cmd_display} ))
 
   # capture when the command was started
   local cmd_start_time=\$(\$DATE_CMD +%s%3N)
