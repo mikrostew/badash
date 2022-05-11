@@ -19,6 +19,7 @@ COLOR_RESET='\033[0m'
 if [ "$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
 if [ -n "$TERM" ]
 then
+  echo "TERM is '$TERM'"
   COLUMNS="$(tput cols)"
 else
   COLUMNS=80
