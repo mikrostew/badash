@@ -17,12 +17,12 @@ COLOR_FG_BOLD_GREEN='\033[1;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 if [ "$(uname -s)" == 'Darwin' ]; then DATE_CMD=gdate; else DATE_CMD=date; fi
-if [ -n "$TERM" ]
+# https://invisible-island.net/ncurses/terminfo.src.html#toc-_Specials
+if [ -z "$TERM" ] || [ "$TERM" = "dumb" ] || [ "$TERM" = "unknown" ]
 then
-  echo "TERM is '$TERM'"
-  COLUMNS="$(tput cols)"
-else
   COLUMNS=80
+else
+  COLUMNS="$(tput cols)"
 fi
 # show a busy spinner while command is running
 # and only show output if there is an error
