@@ -440,10 +440,10 @@ END_FILE_CONTENTS
 
   # save current term width, modify it, return it after the command
   # (so this test is not dependent on current term width)
-  read -r rows cols < <(stty size)
-  stty cols 80
+  read -r rows cols < <(stty size) || true
+  stty cols 80 || true
   run ./badash "$bash_script"
-  stty cols "$cols"
+  stty cols "$cols" || true
   [ "$status" -eq 0 ]
 
   # have to clean this up
