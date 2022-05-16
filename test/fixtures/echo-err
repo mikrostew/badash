@@ -1,0 +1,3 @@
+#!/usr/bin/env badash
+echo "should echo things"
+@echo-err "does this 'echo things'?"

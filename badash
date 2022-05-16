@@ -4,6 +4,7 @@
 
 REQ_CHECK_FUNC_NAME="gen::req-check"
 WAIT_COMMAND_FUNC_NAME="gen::wait-for-command"
+ECHO_ERR_FUNC_NAME="gen::echo-err"
 
 # colors
 COLOR_RESET='\033[0m'
@@ -258,6 +259,21 @@ END_OF_WAIT_FUNCTION
   printf -v $retvar "%s" "$func_text"
 }
 
+# generate $ECHO_ERR_FUNC_NAME function
+gen-echo-err-function() {
+  local retvar="$1" # write the function text to this variable
+
+  # (no arguments to this function)
+  # Note: it takes 4 backslashes here to generate 1 in the output
+  read -d '' func_text <<END_OF_ECHO_ERR_FUNC
+$ECHO_ERR_FUNC_NAME() {
+  echo -e "\\\\033[0;31m\$*\\\\033[0m" >&2
+}
+END_OF_ECHO_ERR_FUNC
+  # write the function text to the variable (instead of echo)
+  printf -v $retvar "%s" "$func_text"
+}
+
 
 
 ########## EXECUTION START ##########
@@ -348,6 +364,14 @@ do
     generated_body+=( "$replaced_directive" )
     # make sure the function that does that is part of imports
     import-function-lazy "$WAIT_COMMAND_FUNC_NAME" 'gen-wait-command-function'
+
+  # echo in red, to stderr
+  elif [[ "$line" =~ @echo-err ]]
+  then
+    replaced_directive="${line//@echo-err/$ECHO_ERR_FUNC_NAME}"
+    generated_body+=( "$replaced_directive" )
+    # make sure the function that does that is part of imports
+    import-function-lazy "$ECHO_ERR_FUNC_NAME" 'gen-echo-err-function'
 
   # TODO: @confirm_y/n
   # but, how to do default for that (specify default yes or no)

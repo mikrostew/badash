@@ -5,6 +5,7 @@ Convenience methods, modular imports, and other fun stuff for bash
 [Installation](#installation)
 
 [Convenience Methods](#convenience-methods)
+* [@echo-err](#echo-err)
 * [@exit-on-error](#exit-on-error)
 * [@wait-for-command](#wait-for-command)
 * [@wait-for-keypress](#wait-for-keypress)
@@ -26,6 +27,32 @@ ln -s /usr/local/lib/badash/badash /usr/local/bin/badash
 ```
 
 # Convenience Methods
+
+## @echo-err
+
+`@echo-err "some string"`
+
+Echo text in red, to stderr.
+
+Example:
+
+```
+#!/usr/bin/env badash
+@echo-err "this is some text"
+```
+
+<details>
+  <summary>What that compiles to</summary>
+
+```bash
+#!/usr/bin/env bash
+gen::echo-err() {
+  echo -e "\033[0;31m$*\033[0m" >&2
+}
+gen::echo-err "this is some text"
+```
+</details>
+
 
 ## @exit-on-error
 
