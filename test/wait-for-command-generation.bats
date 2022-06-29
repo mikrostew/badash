@@ -29,50 +29,48 @@ fi
 gen::wait-for-command() {
   # flags
   #  --show-output (bool): always show command output
-  #  --hide-args (bool): show command name, but hide arguments (for secrets and such)
+  #  --clear (bool): TODO
+  #  --msg (string): TODO
   local more_args=0
+  local message=""
   while [ "$more_args" == 0 ]
   do
     if [ "$1" == "--show-output" ]
     then
       local show_output="true"
       shift
-    elif [ "$1" == "--hide-args" ]
+    elif [ "$1" == "--clear" ]
     then
-      local hide_args="true"
+      local clear="true"
+      shift
+    elif [ "$1" == "--msg" ]
+    then
+      shift
+      message="$1"
       shift
     else
       more_args=1
     fi
   done
-  # rest of the input is the command and arguments
-  if [ "$hide_args" == "true" ]
+  # (rest of the input is the command and arguments)
+  # make sure cmd is not too wide for the terminal
+  # - 3 chars for spinner, 3 for ellipsis, 12 for time printout (estimated)
+  local max_length=$(( COLUMNS - 18 ))
+  if [ -z "$message" ]; then message="$*"; fi
+  local cmd_display="$message"
+  if [ "${#message}" -gt "$max_length" ]
   then
-    local cmd_display="$1 [args hidden]"
-  else
-    # make sure cmd is not too wide for the terminal
-    # - 3 chars for spinner, 3 for ellipsis, 12 for time printout (estimated)
-    local max_length=$(( COLUMNS - 18 ))
-    local cmd_args="$*"
-    if [ "${#cmd_args}" -gt "$max_length" ]
-    then
-      local cmd_display="${cmd_args:0:$max_length}..."
-    else
-      local cmd_display="$cmd_args"
-    fi
+    cmd_display="${message:0:$max_length}..."
   fi
+  local total_length=$(( 3 + ${#cmd_display} ))
 
-  # calculate things for the output
   local spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
   local num_chars=${#spin_chars}
-  #local total_length=$(( 2 + ${#cmd_display} ))
 
-  # capture when the command was started
   local cmd_start_time=$($DATE_CMD +%s%3N)
 
   # start the spinner running async, and get its PID
   (
-    # wait for the command to complete, showing a busy spinner
     i=0
     while :
     do
@@ -83,14 +81,14 @@ gen::wait-for-command() {
   ) & disown
   local spinner_pid="$!"
 
-  # trap signals and kill the spinner process
-  trap "kill $spinner_pid" INT TERM
+  # kill the spinner process for Ctrl-C, and exit this as well
+  trap "kill $spinner_pid && exit" INT TERM
 
   # run the command, capturing its output (both stdout and stderr)
   cmd_output="$("$@" 2>&1)"
   local exit_code="$?"
 
-  # clear the trap, and kill the spinner process
+  # clear the trap, and stop the spinner
   trap - INT TERM
   kill "$spinner_pid"
 
@@ -98,14 +96,16 @@ gen::wait-for-command() {
   local cmd_stop_time=$($DATE_CMD +%s%3N)
   local cmd_run_time=$((cmd_stop_time - cmd_start_time))
 
-  # TODO: attempt to clean up, depending on option (doesn't always work)
-  # but still check if it failed?
-  #printf "\r%-${total_length}s\r" ' ' >&2
-
   # check that the command was successful
   if [ "$exit_code" == 0 ]
   then
-    printf "\r ${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} $cmd_display (${cmd_run_time}ms)\n" >&2
+    # attempt to clean up, for --clear option (best effort, this mostly works)
+    if [ -n "$clear" ]
+    then
+      printf "\r%-${total_length}s\r" ' ' >&2
+    else
+      printf "\r ${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} $cmd_display (${cmd_run_time}ms)\n" >&2
+    fi
     # show output if configured
     if [ "$show_output" == "true" ]; then echo "$cmd_output"; fi
   else
@@ -295,71 +295,6 @@ END_OF_OUTPUT
 $FILE_BOILERPLATE
 echo "testing wait-for-command --show-output"
 gen::wait-for-command --show-output echo "this WILL be printed"
-END_FILE_CONTENTS
-  )"
-
-  run ./badash "$bash_script"
-  [ "$status" -eq 0 ]
-
-  # have to clean this up
-  cleaned_output="$(clean_output "$output")"
-
-  diff <(echo "$cleaned_output") <(echo "$expected_output")
-  diff "$generated_file" <(echo "$expected_file_contents")
-}
-
-# hide arguments with --hide-args flag
-@test "@wait-for-command --hide-args" {
-  bash_script="test/fixtures/wait-for-command-hide"
-  generated_file="$tmpdir/.badash/wait-for-command-hide"
-
-  # the output has some timing info that varies - will fix that in the output
-  expected_output="$(cat <<'END_OF_OUTPUT'
-testing wait-for-command --hide-args
-
- SPIN echo [args hidden]
- GREEN✔RESET echo [args hidden] (113ms)
-END_OF_OUTPUT
-  )"
-
-  # expected generated file
-  expected_file_contents="$(cat <<END_FILE_CONTENTS
-$FILE_BOILERPLATE
-echo "testing wait-for-command --hide-args"
-gen::wait-for-command --hide-args echo "this WILL be printed"
-END_FILE_CONTENTS
-  )"
-
-  run ./badash "$bash_script"
-  [ "$status" -eq 0 ]
-
-  # have to clean this up
-  cleaned_output="$(clean_output "$output")"
-
-  diff <(echo "$cleaned_output") <(echo "$expected_output")
-  diff "$generated_file" <(echo "$expected_file_contents")
-}
-
-# hide arguments and show output
-@test "@wait-for-command --hide-args --show-output" {
-  bash_script="test/fixtures/wait-for-command-hide-show"
-  generated_file="$tmpdir/.badash/wait-for-command-hide-show"
-
-  # the output has some timing info that varies - will fix that in the output
-  expected_output="$(cat <<'END_OF_OUTPUT'
-testing wait-for-command --hide-args --show-output
-
- SPIN echo [args hidden]
- GREEN✔RESET echo [args hidden] (113ms)
-this WILL be printed
-END_OF_OUTPUT
-  )"
-
-  # expected generated file
-  expected_file_contents="$(cat <<END_FILE_CONTENTS
-$FILE_BOILERPLATE
-echo "testing wait-for-command --hide-args --show-output"
-gen::wait-for-command --hide-args --show-output echo "this WILL be printed"
 END_FILE_CONTENTS
   )"
 
