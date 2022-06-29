@@ -29,8 +29,8 @@ fi
 gen::wait-for-command() {
   # flags
   #  --show-output (bool): always show command output
-  #  --clear (bool): TODO
-  #  --msg (string): TODO
+  #  --clear (bool): clear the spinner
+  #  --msg (string): message to show instead of the command
   local more_args=0
   local message=""
   while [ "$more_args" == 0 ]
@@ -128,7 +128,7 @@ END_FILE_BOILERPLATE
 #
 # note that `tr` is using octal here
 clean_output() {
-  LC_ALL=C echo "$1" | tr '\15' '\12CR' | tr -d '\0-\11\13-\37' | sed 's/\[1;32m/GREEN/g' | sed 's/\[0;31m/RED/g' | sed 's/\[0m/RESET/g' | sed 's/[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]/SPIN/g' | sed 's/[0-9]*ms/113ms/'
+  LC_ALL=C echo "$1" | tr '\15' '\12CR' | tr -d '\0-\11\13-\37' | sed 's/\[1;32m/GREEN/g' | sed 's/\[0;31m/RED/g' | sed 's/\[0m/RESET/g' | sed 's/[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]/SPIN/g' | sed 's/[0-9]*ms)/113ms)/'
 }
 
 
@@ -379,6 +379,142 @@ END_FILE_CONTENTS
   stty cols 80 || true
   run ./badash "$bash_script"
   stty cols "$cols" || true
+  [ "$status" -eq 0 ]
+
+  # have to clean this up
+  cleaned_output="$(clean_output "$output")"
+
+  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff "$generated_file" <(echo "$expected_file_contents")
+}
+
+# clear the spinner
+@test "@wait-for-command clear the spinner" {
+  bash_script="test/fixtures/wait-for-command-clear"
+  generated_file="$tmpdir/.badash/wait-for-command-clear"
+
+  # the output has some timing info that varies - will fix that in the output
+  # (using backslash so expected spaces are preserved)
+  expected_output="$(cat <<END_OF_OUTPUT
+testing wait-for-command --clear
+
+ SPIN echo this will be printed
+                            \
+
+END_OF_OUTPUT
+  )"
+
+  # expected generated file
+  expected_file_contents="$(cat <<END_FILE_CONTENTS
+$FILE_BOILERPLATE
+echo "testing wait-for-command --clear"
+gen::wait-for-command --clear echo "this will be printed"
+END_FILE_CONTENTS
+  )"
+
+  run ./badash "$bash_script"
+  [ "$status" -eq 0 ]
+
+  # have to clean this up
+  cleaned_output="$(clean_output "$output")"
+
+  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff "$generated_file" <(echo "$expected_file_contents")
+}
+
+# clear the spinner, and show the command output
+@test "@wait-for-command clear spinner, show output" {
+  bash_script="test/fixtures/wait-for-command-clear-show"
+  generated_file="$tmpdir/.badash/wait-for-command-clear-show"
+
+  # the output has some timing info that varies - will fix that in the output
+  # (using backslash so expected spaces are preserved)
+  expected_output="$(cat <<END_OF_OUTPUT
+testing wait-for-command --clear --show-output
+
+ SPIN echo this WILL be printed
+                            \
+
+this WILL be printed
+END_OF_OUTPUT
+  )"
+
+  # expected generated file
+  expected_file_contents="$(cat <<END_FILE_CONTENTS
+$FILE_BOILERPLATE
+echo "testing wait-for-command --clear --show-output"
+gen::wait-for-command --clear --show-output echo "this WILL be printed"
+END_FILE_CONTENTS
+  )"
+
+  run ./badash "$bash_script"
+  [ "$status" -eq 0 ]
+
+  # have to clean this up
+  cleaned_output="$(clean_output "$output")"
+
+  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff "$generated_file" <(echo "$expected_file_contents")
+}
+
+# show a message instead of the command
+@test "@wait-for-command show message" {
+  bash_script="test/fixtures/wait-for-command-msg"
+  generated_file="$tmpdir/.badash/wait-for-command-msg"
+
+  # the output has some timing info that varies - will fix that in the output
+  expected_output="$(cat <<END_OF_OUTPUT
+testing wait-for-command --msg
+
+ SPIN doing some things
+ GREEN✔RESET doing some things (113ms)
+
+END_OF_OUTPUT
+  )"
+
+  # expected generated file
+  expected_file_contents="$(cat <<END_FILE_CONTENTS
+$FILE_BOILERPLATE
+echo "testing wait-for-command --msg"
+gen::wait-for-command --msg "doing some things" echo "this will not be printed"
+END_FILE_CONTENTS
+  )"
+
+  run ./badash "$bash_script"
+  [ "$status" -eq 0 ]
+
+  # have to clean this up
+  cleaned_output="$(clean_output "$output")"
+
+  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff "$generated_file" <(echo "$expected_file_contents")
+}
+
+# show a message, show the output, and clear the spinner
+@test "@wait-for-command show message, clear spinner, show output" {
+  bash_script="test/fixtures/wait-for-command-msg-clear-show"
+  generated_file="$tmpdir/.badash/wait-for-command-msg-clear-show"
+
+  # the output has some timing info that varies - will fix that in the output
+  expected_output="$(cat <<END_OF_OUTPUT
+testing wait-for-command --msg --clear --show-output
+
+ SPIN doing many things
+                    \
+
+this WILL be printed
+END_OF_OUTPUT
+  )"
+
+  # expected generated file
+  expected_file_contents="$(cat <<END_FILE_CONTENTS
+$FILE_BOILERPLATE
+echo "testing wait-for-command --msg --clear --show-output"
+gen::wait-for-command --msg "doing many things" --clear --show-output echo "this WILL be printed"
+END_FILE_CONTENTS
+  )"
+
+  run ./badash "$bash_script"
   [ "$status" -eq 0 ]
 
   # have to clean this up

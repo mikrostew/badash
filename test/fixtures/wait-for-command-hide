@@ -1,3 +1,0 @@
-#!/usr/bin/env badash
-echo "testing wait-for-command --hide-args"
-@wait-for-command --hide-args echo "this WILL be printed"

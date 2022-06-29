@@ -166,8 +166,8 @@ fi
 $WAIT_COMMAND_FUNC_NAME() {
   # flags
   #  --show-output (bool): always show command output
-  #  --clear (bool): TODO
-  #  --msg (string): TODO
+  #  --clear (bool): clear the spinner
+  #  --msg (string): message to show instead of the command
   local more_args=0
   local message=""
   while [ "\$more_args" == 0 ]
