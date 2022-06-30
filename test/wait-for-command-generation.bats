@@ -131,6 +131,27 @@ clean_output() {
   LC_ALL=C echo "$1" | tr '\15' '\12CR' | tr -d '\0-\11\13-\37' | sed 's/\[1;32m/GREEN/g' | sed 's/\[0;31m/RED/g' | sed 's/\[0m/RESET/g' | sed 's/[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]/SPIN/g' | sed 's/[0-9]*ms)/113ms)/'
 }
 
+diff_output() {
+  # arguments
+  local cleaned_output="$1"
+  local expected_output="$2"
+
+  if ! diff <(echo "$cleaned_output") <(echo "$expected_output")
+  then
+    echo ""
+    echo "Error: output does not match expected"
+    echo ""
+    echo "Expected:"
+    echo "'$expected_output'"
+    echo ""
+    echo "Actual (cleaned):"
+    echo "'$cleaned_output'"
+    echo ""
+    echo "Diff:"
+    diff <(echo "$cleaned_output") <(echo "$expected_output")
+    echo ""
+  fi
+}
 
 ### TESTS
 
@@ -162,7 +183,7 @@ END_FILE_CONTENTS
   # have to clean this up
   cleaned_output="$(clean_output "$output")"
 
-  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff_output "$cleaned_output" "$expected_output"
   diff "$generated_file" <(echo "$expected_file_contents")
 }
 
@@ -198,7 +219,7 @@ END_FILE_CONTENTS
   # have to clean this up
   cleaned_output="$(clean_output "$output")"
 
-  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff_output "$cleaned_output" "$expected_output"
   diff "$generated_file" <(echo "$expected_file_contents")
 }
 
@@ -235,7 +256,7 @@ END_FILE_CONTENTS
   # have to clean this up
   cleaned_output="$(clean_output "$output")"
 
-  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff_output "$cleaned_output" "$expected_output"
   diff "$generated_file" <(echo "$expected_file_contents")
 }
 
@@ -271,7 +292,7 @@ END_FILE_CONTENTS
   # have to clean this up
   cleaned_output="$(clean_output "$output")"
 
-  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff_output "$cleaned_output" "$expected_output"
   diff "$generated_file" <(echo "$expected_file_contents")
 }
 
@@ -304,7 +325,7 @@ END_FILE_CONTENTS
   # have to clean this up
   cleaned_output="$(clean_output "$output")"
 
-  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff_output "$cleaned_output" "$expected_output"
   diff "$generated_file" <(echo "$expected_file_contents")
 }
 
@@ -346,7 +367,7 @@ END_FILE_CONTENTS
   # have to clean this up
   cleaned_output="$(clean_output "$output")"
 
-  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff_output "$cleaned_output" "$expected_output"
   diff "$generated_file" <(echo "$expected_file_contents")
 }
 
@@ -384,7 +405,7 @@ END_FILE_CONTENTS
   # have to clean this up
   cleaned_output="$(clean_output "$output")"
 
-  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff_output "$cleaned_output" "$expected_output"
   diff "$generated_file" <(echo "$expected_file_contents")
 }
 
@@ -418,7 +439,7 @@ END_FILE_CONTENTS
   # have to clean this up
   cleaned_output="$(clean_output "$output")"
 
-  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff_output "$cleaned_output" "$expected_output"
   diff "$generated_file" <(echo "$expected_file_contents")
 }
 
@@ -453,7 +474,7 @@ END_FILE_CONTENTS
   # have to clean this up
   cleaned_output="$(clean_output "$output")"
 
-  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff_output "$cleaned_output" "$expected_output"
   diff "$generated_file" <(echo "$expected_file_contents")
 }
 
@@ -486,7 +507,7 @@ END_FILE_CONTENTS
   # have to clean this up
   cleaned_output="$(clean_output "$output")"
 
-  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff_output "$cleaned_output" "$expected_output"
   diff "$generated_file" <(echo "$expected_file_contents")
 }
 
@@ -520,7 +541,7 @@ END_FILE_CONTENTS
   # have to clean this up
   cleaned_output="$(clean_output "$output")"
 
-  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff_output "$cleaned_output" "$expected_output"
   diff "$generated_file" <(echo "$expected_file_contents")
 }
 
@@ -556,7 +577,7 @@ END_FILE_CONTENTS
   # have to clean this up
   cleaned_output="$(clean_output "$output")"
 
-  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff_output "$cleaned_output" "$expected_output"
   diff "$generated_file" <(echo "$expected_file_contents")
 }
 
