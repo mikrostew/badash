@@ -1,0 +1,4 @@
+#!/usr/bin/env badash
+echo "testing wait-for-command --clear when command fails"
+# this script fails
+@wait-for-command --clear ./test/fixtures/fail-with-output.sh

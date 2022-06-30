@@ -524,3 +524,39 @@ END_FILE_CONTENTS
   diff "$generated_file" <(echo "$expected_file_contents")
 }
 
+# clear the spinner but the command fails
+@test "@wait-for-command clear spinner but command fails" {
+  bash_script="test/fixtures/wait-for-command-clear-fails"
+  generated_file="$tmpdir/.badash/wait-for-command-clear-fails"
+
+  # the output has some timing info that varies - will fix that in the output
+  expected_output="$(cat <<END_OF_OUTPUT
+testing wait-for-command --clear when command fails
+
+ SPIN ./test/fixtures/fail-with-output.sh
+ RED✖RESET ./test/fixtures/fail-with-output.sh (113ms)
+REDstdout text
+stderr textRESET
+END_OF_OUTPUT
+  )"
+
+  # expected generated file
+  expected_file_contents="$(cat <<END_FILE_CONTENTS
+$FILE_BOILERPLATE
+echo "testing wait-for-command --clear when command fails"
+# this script fails
+gen::wait-for-command --clear ./test/fixtures/fail-with-output.sh
+END_FILE_CONTENTS
+  )"
+
+  run ./badash "$bash_script"
+  # fails with the exit code of the script
+  [ "$status" -eq 2 ]
+
+  # have to clean this up
+  cleaned_output="$(clean_output "$output")"
+
+  diff <(echo "$cleaned_output") <(echo "$expected_output")
+  diff "$generated_file" <(echo "$expected_file_contents")
+}
+
