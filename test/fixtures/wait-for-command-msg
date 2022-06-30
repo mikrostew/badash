@@ -1,0 +1,3 @@
+#!/usr/bin/env badash
+echo "testing wait-for-command --msg"
+@wait-for-command --msg "doing some things" echo "this will not be printed"

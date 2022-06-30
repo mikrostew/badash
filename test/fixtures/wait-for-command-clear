@@ -1,0 +1,3 @@
+#!/usr/bin/env badash
+echo "testing wait-for-command --clear"
+@wait-for-command --clear echo "this will be printed"

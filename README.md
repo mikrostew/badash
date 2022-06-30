@@ -124,7 +124,9 @@ Wait for a long-running command to finish, displaying a spinner while it runs. S
 
 `--show-output` By default, command output is hidden unless it returns an error code. This option will also show the command output if the command is successful.
 
-`--hide-args` By default, the command and all arguments are shown in the spinner text. This option hides the arguments, and replaces them with `[args hidden]`.
+`--msg <message>` Instead of showing the command with the spinner, show a custom message.
+
+`--clear` When the command finishes, clear the spinner and the status line (unless the command fails).
 
 Example:
 
