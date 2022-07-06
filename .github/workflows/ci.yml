@@ -1,9 +1,11 @@
 name: "CI"
 on: [push, pull_request]
 jobs:
-  test:
-    name: test
-    runs-on: ubuntu-latest
+  test_matrix:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Setup BATS
         uses: mig4/setup-bats@v1
