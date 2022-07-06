@@ -13,6 +13,7 @@ teardown() {
 # boilerplate: the main wait-for-command generated function
 FILE_BOILERPLATE="$(cat <<'END_FILE_BOILERPLATE'
 #!/usr/bin/env bash
+# Generated from '', 1234-56-78 12:34:56
 COLOR_FG_BOLD_GREEN='\033[1;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -136,7 +137,7 @@ diff_output() {
   local cleaned_output="$1"
   local expected_output="$2"
 
-  if ! diff <(echo "$cleaned_output") <(echo "$expected_output")
+  if [ "$cleaned_output" != "$expected_output" ]
   then
     echo ""
     echo "Error: output does not match expected"
@@ -149,6 +150,30 @@ diff_output() {
     echo ""
     echo "Diff:"
     diff <(echo "$cleaned_output") <(echo "$expected_output")
+    echo ""
+  fi
+}
+
+compare_file_contents() {
+  local generated="$1"
+  local expected="$2"
+
+  # cleanup the non-deterministic contents in the "Generated from ..." line
+  local cleaned_gen_file="$(echo "$1" | sed "s/# Generated from '.*', [0-9-]* [0-9:]*/# Generated from '', 1234-56-78 12:34:56/g")"
+
+  if [ "$cleaned_gen_file" != "$expected" ]
+  then
+    echo ""
+    echo "Error: generated file does not match expected"
+    echo ""
+    echo "Expected:"
+    echo "'$expected'"
+    echo ""
+    echo "Generated (cleaned):"
+    echo "'$cleaned_gen_file'"
+    echo ""
+    echo "Diff:"
+    diff <(echo "$cleaned_gen_file") <(echo "$expected")
     echo ""
   fi
 }
@@ -184,7 +209,7 @@ END_FILE_CONTENTS
   cleaned_output="$(clean_output "$output")"
 
   diff_output "$cleaned_output" "$expected_output"
-  diff "$generated_file" <(echo "$expected_file_contents")
+  compare_file_contents "$(<$generated_file)" "$expected_file_contents"
 }
 
 # when multiple commands use "@wait-for-command"
@@ -220,7 +245,7 @@ END_FILE_CONTENTS
   cleaned_output="$(clean_output "$output")"
 
   diff_output "$cleaned_output" "$expected_output"
-  diff "$generated_file" <(echo "$expected_file_contents")
+  compare_file_contents "$(<$generated_file)" "$expected_file_contents"
 }
 
 # when the command fails
@@ -257,7 +282,7 @@ END_FILE_CONTENTS
   cleaned_output="$(clean_output "$output")"
 
   diff_output "$cleaned_output" "$expected_output"
-  diff "$generated_file" <(echo "$expected_file_contents")
+  compare_file_contents "$(<$generated_file)" "$expected_file_contents"
 }
 
 # two @directives on the same line
@@ -293,7 +318,7 @@ END_FILE_CONTENTS
   cleaned_output="$(clean_output "$output")"
 
   diff_output "$cleaned_output" "$expected_output"
-  diff "$generated_file" <(echo "$expected_file_contents")
+  compare_file_contents "$(<$generated_file)" "$expected_file_contents"
 }
 
 # show command output with --show-output flag
@@ -326,7 +351,7 @@ END_FILE_CONTENTS
   cleaned_output="$(clean_output "$output")"
 
   diff_output "$cleaned_output" "$expected_output"
-  diff "$generated_file" <(echo "$expected_file_contents")
+  compare_file_contents "$(<$generated_file)" "$expected_file_contents"
 }
 
 # hitting Ctrl-C while the command is still running
@@ -368,7 +393,7 @@ END_FILE_CONTENTS
   cleaned_output="$(clean_output "$output")"
 
   diff_output "$cleaned_output" "$expected_output"
-  diff "$generated_file" <(echo "$expected_file_contents")
+  compare_file_contents "$(<$generated_file)" "$expected_file_contents"
 }
 
 # command too long for the line
@@ -406,7 +431,7 @@ END_FILE_CONTENTS
   cleaned_output="$(clean_output "$output")"
 
   diff_output "$cleaned_output" "$expected_output"
-  diff "$generated_file" <(echo "$expected_file_contents")
+  compare_file_contents "$(<$generated_file)" "$expected_file_contents"
 }
 
 # clear the spinner
@@ -440,7 +465,7 @@ END_FILE_CONTENTS
   cleaned_output="$(clean_output "$output")"
 
   diff_output "$cleaned_output" "$expected_output"
-  diff "$generated_file" <(echo "$expected_file_contents")
+  compare_file_contents "$(<$generated_file)" "$expected_file_contents"
 }
 
 # clear the spinner, and show the command output
@@ -475,7 +500,7 @@ END_FILE_CONTENTS
   cleaned_output="$(clean_output "$output")"
 
   diff_output "$cleaned_output" "$expected_output"
-  diff "$generated_file" <(echo "$expected_file_contents")
+  compare_file_contents "$(<$generated_file)" "$expected_file_contents"
 }
 
 # show a message instead of the command
@@ -508,7 +533,7 @@ END_FILE_CONTENTS
   cleaned_output="$(clean_output "$output")"
 
   diff_output "$cleaned_output" "$expected_output"
-  diff "$generated_file" <(echo "$expected_file_contents")
+  compare_file_contents "$(<$generated_file)" "$expected_file_contents"
 }
 
 # show a message, show the output, and clear the spinner
@@ -542,7 +567,7 @@ END_FILE_CONTENTS
   cleaned_output="$(clean_output "$output")"
 
   diff_output "$cleaned_output" "$expected_output"
-  diff "$generated_file" <(echo "$expected_file_contents")
+  compare_file_contents "$(<$generated_file)" "$expected_file_contents"
 }
 
 # clear the spinner but the command fails
@@ -578,6 +603,6 @@ END_FILE_CONTENTS
   cleaned_output="$(clean_output "$output")"
 
   diff_output "$cleaned_output" "$expected_output"
-  diff "$generated_file" <(echo "$expected_file_contents")
+  compare_file_contents "$(<$generated_file)" "$expected_file_contents"
 }
 
