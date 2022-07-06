@@ -16,11 +16,11 @@ jobs:
   test_macos:
     runs-on: macos-latest
     steps:
-      - name: Brew Install Bash
+      - name: Brew Install Bash and Coreutils
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           brew update
-          brew install bash
+          brew install bash coreutils
           echo "/usr/local/bin" >> $GITHUB_PATH
 
       - name: Setup BATS
