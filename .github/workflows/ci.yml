@@ -1,12 +1,28 @@
 name: "CI"
 on: [push, pull_request]
 jobs:
-  test_matrix:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+  test_ubuntu:
+    runs-on: ubuntu-latest
     steps:
+      - name: Setup BATS
+        uses: mig4/setup-bats@v1
+
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Test
+        run: bats test/
+
+  test_macos:
+    runs-on: macos-latest
+    steps:
+      - name: Brew Install Bash
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          brew update
+          brew install bash
+          echo "/usr/local/bin" >> $GITHUB_PATH
+
       - name: Setup BATS
         uses: mig4/setup-bats@v1
 
