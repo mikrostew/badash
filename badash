@@ -402,15 +402,15 @@ do
     import-function-lazy "$ECHO_ERR_FUNC_NAME" 'gen-echo-err-function'
 
   # directory of the source script
-  elif [[ "$line" =~ @@SCRIPT_DIR@@ ]]
+  elif [[ "$line" =~ @@SCRIPT-DIR@@ ]]
   then
-    replaced_directive="${line//@@SCRIPT_DIR@@/$script_dir}"
+    replaced_directive="${line//@@SCRIPT-DIR@@/$script_dir}"
     generated_body+=( "$replaced_directive" )
 
   # name of the source script
-  elif [[ "$line" =~ @@SCRIPT_NAME@@ ]]
+  elif [[ "$line" =~ @@SCRIPT-NAME@@ ]]
   then
-    replaced_directive="${line//@@SCRIPT_NAME@@/$bare_script_name}"
+    replaced_directive="${line//@@SCRIPT-NAME@@/$bare_script_name}"
     generated_body+=( "$replaced_directive" )
 
   # TODO: @confirm_y/n

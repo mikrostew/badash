@@ -44,8 +44,8 @@ compare_file_contents_notime() {
 
   cat <<'END_OF_SCRIPT_FILE' >"$bash_script"
 #!/usr/bin/env badash
-echo "script name: @@SCRIPT_NAME@@"
-echo "script dir: @@SCRIPT_DIR@@"
+echo "script name: @@SCRIPT-NAME@@"
+echo "script dir: @@SCRIPT-DIR@@"
 END_OF_SCRIPT_FILE
 
   expected_output="$(cat <<END_OF_OUTPUT
@@ -80,8 +80,8 @@ END_OF_GEN_CODE
 
   cat <<'END_OF_SCRIPT_FILE' >"$bash_script"
 #!/usr/bin/env badash
-echo "script name: @@SCRIPT_NAME@@"
-echo "script dir: @@SCRIPT_DIR@@"
+echo "script name: @@SCRIPT-NAME@@"
+echo "script dir: @@SCRIPT-DIR@@"
 END_OF_SCRIPT_FILE
 
   expected_output="$(cat <<END_OF_OUTPUT
