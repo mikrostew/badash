@@ -9,6 +9,8 @@ Convenience methods, modular imports, and other fun stuff for bash
 * [@exit-on-error](#exit-on-error)
 * [@wait-for-command](#wait-for-command)
 * [@wait-for-keypress](#wait-for-keypress)
+* [@@SCRIPT-NAME@@](#script-name)
+* [@@SCRIPT-DIR@@](#script-dir)
 
 [Tests and Checks](#tests-and-checks)
 * [@system-is-\*](#system-is-)
@@ -270,6 +272,19 @@ echo -n 'Press a key to continue...'
 read -n1 -s
 ```
 </details>
+
+## @@SCRIPT-NAME@@
+
+`@@SCRIPT-NAME@@`
+
+This will be replaced with the name of the script file.
+
+
+## @@SCRIPT-DIR@@
+
+`@@SCRIPT-DIR@@`
+
+This will be replaced with the full path to the directory where the script is located, with symlinks resolved.
 
 
 # Tests and Checks

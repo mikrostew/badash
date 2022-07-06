@@ -273,7 +273,32 @@ END_OF_ECHO_ERR_FUNC
   printf -v $retvar "%s" "$func_text"
 }
 
-
+# get full path to the input file or directory (starting from /),
+# resolving any symlinks in the path
+_resolve_links() {
+  # symlinks are similar to files
+  if [ -L "$1" ]
+  then
+    local target="$(readlink "$1")"
+    echo "$(cd "${target%/*}" >/dev/null; pwd -P)/${target##*/}"
+  # file is more complicated
+  elif [ -f "$1" ]
+  then
+    # for absolute and relative paths, cd to parent dir and resolve symlinks
+    if [[ $1 = /* ]] || [[ $1 == */* ]]
+    then
+      echo "$(cd "${1%/*}" >/dev/null; pwd -P)/${1##*/}"
+    else
+      # for bare filename, assume it's in PWD
+      echo "$(pwd -P)/$1"
+    fi
+  # directory is easy
+  elif [ -d "$1" ]
+  then
+    # suppress spurious output from cd, and resolve symlinks
+    (cd "$1" >/dev/null; pwd -P)
+  fi
+}
 
 ########## EXECUTION START ##########
 
@@ -283,7 +308,7 @@ then
   echo "badash: Missing argument: script to execute" >&2
   exit 1
 fi
-script_file="$1"
+script_file="$(_resolve_links "$1")"
 shift
 
 # TODO: --help argument to describe usage
@@ -305,11 +330,15 @@ declare -A cmd_requirements
 declare -A function_imports
 
 # generated code will be written to this file
-bare_script_name="$(basename "$script_file")"
+bare_script_name="${script_file##*/}"
 generated_script="$script_cache/$bare_script_name"
+
+# save the directory of the input script file for the @@SCRIPT_DIR@@ directive
+script_dir="${script_file%/*}"
 
 # first line in the file, so that bash will execute the script
 generated_header+=( "#!/usr/bin/env bash" )
+generated_header+=( "# Generated from '$script_file', $(date '+%Y-%m-%d %H:%M:%S')" )
 
 # read the script line by line
 while IFS= read -r line
@@ -372,6 +401,18 @@ do
     # make sure the function that does that is part of imports
     import-function-lazy "$ECHO_ERR_FUNC_NAME" 'gen-echo-err-function'
 
+  # directory of the source script
+  elif [[ "$line" =~ @@SCRIPT-DIR@@ ]]
+  then
+    replaced_directive="${line//@@SCRIPT-DIR@@/$script_dir}"
+    generated_body+=( "$replaced_directive" )
+
+  # name of the source script
+  elif [[ "$line" =~ @@SCRIPT-NAME@@ ]]
+  then
+    replaced_directive="${line//@@SCRIPT-NAME@@/$bare_script_name}"
+    generated_body+=( "$replaced_directive" )
+
   # TODO: @confirm_y/n
   # but, how to do default for that (specify default yes or no)
   # like @confirm_Y/n vs. @confirm_y/N ?? guess that would work...
@@ -383,8 +424,6 @@ do
   # TODO: @arg and @arg_optional
 
   # TODO: some way to create help text for -h/--help
-
-  # TODO: things like @@SCRIPT_NAME@@, @@DIR_NAME@@, etc, so the script can use those
 
   # TODO: colors, like @GREEN{{some text}}
 
