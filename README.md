@@ -1,6 +1,6 @@
 # badash
 
-Convenience methods, modular imports, and other fun stuff for bash
+Convenience methods and other fun stuff for bash
 
 [Installation](#installation)
 
@@ -23,9 +23,7 @@ Convenience methods, modular imports, and other fun stuff for bash
 (you may need to make `/usr/local/lib` and `/usr/local/bin` writeable first)
 
 ```
-cd /usr/local/lib/
-git clone git@github.com:mikrostew/badash.git
-ln -s /usr/local/lib/badash/badash /usr/local/bin/badash
+curl https://raw.githubusercontent.com/mikrostew/badash/master/install.sh | bash
 ```
 
 # Convenience Methods
