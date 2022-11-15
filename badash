@@ -273,6 +273,31 @@ END_OF_ECHO_ERR_FUNC
   printf -v $retvar "%s" "$func_text"
 }
 
+# code to determine the default git branch
+gen-git-default-branch() {
+  # arguments:
+  local varname="$1" # write the generated code to this variable
+  local padding="$2" # padding to use to line up with the code correctly
+  local store_var="$3" # use this var to store the default branch name
+
+  local temp_code="\
+${padding}if git show-ref --verify --quiet refs/heads/main
+${padding}then
+${padding}  ${store_var}='main'
+${padding}elif git show-ref --verify --quiet refs/heads/master
+${padding}then
+${padding}  ${store_var}='master'
+${padding}else
+${padding}  ${ECHO_ERR_FUNC_NAME} \"Error: default branch is not 'main' or 'master'\"
+${padding}  exit 1
+${padding}fi"
+
+  # it uses this function, so make sure it is included
+  import-function-lazy "$ECHO_ERR_FUNC_NAME" 'gen-echo-err-function'
+
+  printf -v "$varname" "%s" "$temp_code"
+}
+
 # get full path to the input file or directory (starting from /),
 # resolving any symlinks in the path
 _resolve_links() {
@@ -412,6 +437,14 @@ do
   then
     replaced_directive="${line//@@SCRIPT-NAME@@/$bare_script_name}"
     generated_body+=( "$replaced_directive" )
+
+  # name of the default git branch
+  elif [[ "$line" =~ ^(\ *)@git-default-branch\ (.*)$ ]]
+  then
+    padding="${BASH_REMATCH[1]}"
+    var_name="${BASH_REMATCH[2]}"
+    gen-git-default-branch git_default_branch_code "$padding" "$var_name"
+    generated_body+=( "$git_default_branch_code" )
 
   # TODO: @confirm_y/n
   # but, how to do default for that (specify default yes or no)
