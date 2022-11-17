@@ -7,6 +7,7 @@ Convenience methods and other fun stuff for bash
 [Convenience Methods](#convenience-methods)
 * [@echo-err](#echo-err)
 * [@exit-on-error](#exit-on-error)
+* [@git-default-branch](#git-default-branch)
 * [@wait-for-command](#wait-for-command)
 * [@wait-for-keypress](#wait-for-keypress)
 * [@@SCRIPT-NAME@@](#script-name)
@@ -110,6 +111,43 @@ then
   git undo-merge-somehow
   exit "$exit_code"
 fi
+```
+</details>
+
+
+## @git-default-branch
+
+`@git-default-branch var_name`
+
+Store the name of the default branch (main or master) in the variable named `var_name`.
+
+Example:
+
+```bash
+#!/usr/bin/env badash
+@git-default-branch default_branch
+echo "$default_branch"
+```
+
+<details>
+  <summary>What that compiles to</summary>
+
+```bash
+#!/usr/bin/env bash
+gen::echo-err() {
+  echo -e "\033[0;31m$*\033[0m" >&2
+}
+if git show-ref --verify --quiet refs/heads/main
+then
+  some_default_branch='main'
+elif git show-ref --verify --quiet refs/heads/master
+then
+  some_default_branch='master'
+else
+  gen::echo-err "Error: default branch is not 'main' or 'master'"
+  exit 1
+fi
+echo "$default_branch"
 ```
 </details>
 
