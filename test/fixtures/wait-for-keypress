@@ -1,3 +1,4 @@
 #!/usr/bin/env badash
 echo "should do things"
-@wait-for-keypress 'Press any key to continue...'
+# spaced to test that the padding is correct
+  @wait-for-keypress 'Press any key to continue...'

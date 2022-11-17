@@ -1,6 +1,7 @@
 #!/usr/bin/env badash
 
 echo "something that passes"
-@exit-on-error 'Somehow echo failed'
+# spaced to test padding
+    @exit-on-error 'Somehow echo failed'
 
 echo "if it got this far it didn't fail"

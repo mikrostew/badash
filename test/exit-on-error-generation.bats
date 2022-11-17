@@ -53,13 +53,14 @@ END_OF_OUTPUT
 # Generated from '', 1234-56-78 12:34:56
 
 echo "something that passes"
-exit_code="$?"
-if [ "$exit_code" -ne 0 ]
-then
-  echo "Somehow echo failed" >&2
-  # (no code to run before exit)
-  exit "$exit_code"
-fi
+# spaced to test padding
+    exit_code="$?"
+    if [ "$exit_code" -ne 0 ]
+    then
+      echo "Somehow echo failed" >&2
+      # (no code to run before exit)
+      exit "$exit_code"
+    fi
 
 echo "if it got this far it didn't fail"
 END_FILE_CONTENTS

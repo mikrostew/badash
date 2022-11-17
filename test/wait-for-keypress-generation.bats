@@ -50,8 +50,9 @@ END_OF_OUTPUT
 #!/usr/bin/env bash
 # Generated from '', 1234-56-78 12:34:56
 echo "should do things"
-echo 'Press any key to continue...'
-read -n1 -s
+# spaced to test that the padding is correct
+  echo 'Press any key to continue...'
+  read -n1 -s
 END_FILE_CONTENTS
   )"
 
