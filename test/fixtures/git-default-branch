@@ -1,0 +1,5 @@
+#!/usr/bin/env badash
+echo "git branch things"
+# spaced to test that the padding is correct
+   @git-default-branch some_default_branch
+echo "$some_default_branch"
