@@ -1,0 +1,9 @@
+[package]
+name = "badash"
+version = "0.1.0"
+edition = "2021"
+description = "Convenience methods and other fun stuff for bash"
+license = "MIT"
+authors = ["Michael Stewart <mikrostew@gmail.com>"]
+
+[dependencies]
