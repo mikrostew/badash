@@ -76,7 +76,7 @@ gen::wait-for-command() {
     while :
     do
       i=$(( (i + 1) % num_chars ))
-      printf "\r ${spin_chars:$i:1} ${cmd_display}" >&2
+      printf "\r ${spin_chars:$i:1} %s" "$cmd_display" >&2
       sleep 0.1
     done
   ) & disown
@@ -105,12 +105,12 @@ gen::wait-for-command() {
     then
       printf "\r%-${total_length}s\r" ' ' >&2
     else
-      printf "\r ${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} $cmd_display (${cmd_run_time}ms)\n" >&2
+      printf "\r ${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} %s (${cmd_run_time}ms)\n" "$cmd_display" >&2
     fi
     # show output if configured
     if [ "$show_output" == "true" ]; then echo "$cmd_output"; fi
   else
-    printf "\r ${COLOR_FG_RED}✖${COLOR_RESET} $cmd_display (${cmd_run_time}ms)\n" >&2
+    printf "\r ${COLOR_FG_RED}✖${COLOR_RESET} %s (${cmd_run_time}ms)\n" "$cmd_display" >&2
     # if it fails, show the command output (in red)
     echo -e "${COLOR_FG_RED}$cmd_output${COLOR_RESET}" >&2
   fi
